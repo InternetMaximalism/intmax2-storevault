@@ -14,7 +14,10 @@ type PGX interface {
 	BackupTransfers
 	BackupTransactions
 	BackupDeposits
+	BackupSenderProofs
 	BackupBalances
+	BackupUserState
+	BalanceProof
 }
 
 type GenericCommands interface {
@@ -32,7 +35,6 @@ type ServiceCommands interface {
 type BackupTransfers interface {
 	CreateBackupTransfer(
 		recipient, encryptedTransferHash, encryptedTransfer string,
-		senderLastBalanceProofBody, senderBalanceTransitionProofBody []byte,
 		blockNumber int64,
 	) (*mDBApp.BackupTransfer, error)
 	GetBackupTransfer(condition string, value string) (*mDBApp.BackupTransfer, error)
@@ -94,6 +96,14 @@ type BackupDeposits interface {
 	)
 }
 
+type BackupSenderProofs interface {
+	CreateBackupSenderProof(
+		lastBalanceProofBody, balanceTransitionProofBody []byte,
+		enoughBalanceProofBodyHash string,
+	) (*mDBApp.BackupSenderProof, error)
+	GetBackupSenderProofsByHashes(enoughBalanceProofBodyHashes []string) ([]*mDBApp.BackupSenderProof, error)
+}
+
 type BackupBalances interface {
 	CreateBackupBalance(
 		user, encryptedBalanceProof, encryptedBalanceData, signature string,
@@ -103,4 +113,26 @@ type BackupBalances interface {
 	GetBackupBalance(conditions []string, values []interface{}) (*mDBApp.BackupBalance, error)
 	GetBackupBalances(condition string, value interface{}) ([]*mDBApp.BackupBalance, error)
 	GetLatestBackupBalanceByUserAddress(user string, limit int64) ([]*mDBApp.BackupBalance, error)
+}
+
+type BackupUserState interface {
+	CreateBackupUserState(
+		userAddress, encryptedUserState, authSignature string,
+		blockNumber int64,
+	) (*mDBApp.UserState, error)
+	UpdateBackupUserState(
+		id, encryptedUserState, authSignature string,
+		blockNumber int64,
+	) (*mDBApp.UserState, error)
+	GetBackupUserState(id string) (*mDBApp.UserState, error)
+}
+
+type BalanceProof interface {
+	CreateBalanceProof(
+		userStateID, userAddress, privateStateCommitment string,
+		blockNumber int64,
+		balanceProof []byte,
+	) (*mDBApp.BalanceProof, error)
+	GetBalanceProof(id string) (*mDBApp.BalanceProof, error)
+	GetBalanceProofByUserStateID(userStateID string) (*mDBApp.BalanceProof, error)
 }

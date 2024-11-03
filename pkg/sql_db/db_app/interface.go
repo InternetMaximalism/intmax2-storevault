@@ -14,7 +14,10 @@ type SQLDb interface {
 	BackupTransfers
 	BackupTransactions
 	BackupDeposits
+	BackupSenderProofs
 	BackupBalances
+	BackupUserState
+	BalanceProof
 }
 
 type GenericCommands interface {
@@ -32,7 +35,6 @@ type ServiceCommands interface {
 type BackupTransfers interface {
 	CreateBackupTransfer(
 		recipient, encryptedTransferHash, encryptedTransfer string,
-		senderLastBalanceProofBody, senderBalanceTransitionProofBody []byte,
 		blockNumber int64,
 	) (*models.BackupTransfer, error)
 	GetBackupTransfer(condition string, value string) (*models.BackupTransfer, error)
@@ -94,6 +96,14 @@ type BackupDeposits interface {
 	)
 }
 
+type BackupSenderProofs interface {
+	CreateBackupSenderProof(
+		lastBalanceProofBody, balanceTransitionProofBody []byte,
+		enoughBalanceProofBodyHash string,
+	) (*models.BackupSenderProof, error)
+	GetBackupSenderProofsByHashes(enoughBalanceProofBodyHashes []string) ([]*models.BackupSenderProof, error)
+}
+
 type BackupBalances interface {
 	CreateBackupBalance(
 		user, encryptedBalanceProof, encryptedBalanceData, signature string,
@@ -103,4 +113,26 @@ type BackupBalances interface {
 	GetBackupBalance(conditions []string, values []interface{}) (*models.BackupBalance, error)
 	GetBackupBalances(condition string, value interface{}) ([]*models.BackupBalance, error)
 	GetLatestBackupBalanceByUserAddress(user string, limit int64) ([]*models.BackupBalance, error)
+}
+
+type BackupUserState interface {
+	CreateBackupUserState(
+		userAddress, encryptedUserState, authSignature string,
+		blockNumber int64,
+	) (*models.UserState, error)
+	UpdateBackupUserState(
+		id, encryptedUserState, authSignature string,
+		blockNumber int64,
+	) (*models.UserState, error)
+	GetBackupUserState(id string) (*models.UserState, error)
+}
+
+type BalanceProof interface {
+	CreateBalanceProof(
+		userStateID, userAddress, privateStateCommitment string,
+		blockNumber int64,
+		balanceProof []byte,
+	) (*models.BalanceProof, error)
+	GetBalanceProof(id string) (*models.BalanceProof, error)
+	GetBalanceProofByUserStateID(userStateID string) (*models.BalanceProof, error)
 }

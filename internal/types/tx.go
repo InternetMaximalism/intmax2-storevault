@@ -49,12 +49,12 @@ func (t *Tx) Equal(tx *Tx) bool {
 // // Testing purposes only
 // func (t *Tx) SetRandom() (*Tx, error) {
 // 	var err error
-
+//
 // 	t.Transfers, err = new(PoseidonHashOut).SetRandom()
 // 	if err != nil {
 // 		return nil, err
 // 	}
-
+//
 // 	return t, nil
 // }
 
@@ -229,9 +229,9 @@ func (td *TxDetails) Read(buf *bytes.Buffer) error {
 	}
 
 	/**
-	if len(buf.Bytes()) == 0 {
-	    return nil
-	}
+	// if len(buf.Bytes()) == 0 {
+	// 	return nil
+	// }
 	*/
 
 	txTreeRoot := new(PoseidonHashOut)
@@ -308,16 +308,26 @@ func (td *TxDetailsV0) Unmarshal(data []byte) error {
 }
 
 func UnmarshalTxDetails(version uint32, data []byte) (*TxDetails, error) {
-	switch version {
-	case 0:
+	/**
+	// switch version {
+	// case 0:
+	// 	fmt.Println("WARNING: Using old version of TxDetails")
+	// 	return UnmarshalTxDetailsV0(data)
+	// case 1:
+	// 	return UnmarshalTxDetailsV1(data)
+	// default:
+	// 	var ErrUnsupportedVersion = fmt.Errorf("unsupported version: %d", version)
+	// 	return nil, ErrUnsupportedVersion
+	// }
+	*/
+
+	txDetails, err := UnmarshalTxDetailsV1(data)
+	if err != nil {
 		fmt.Println("WARNING: Using old version of TxDetails")
 		return UnmarshalTxDetailsV0(data)
-	case 1:
-		return UnmarshalTxDetailsV1(data)
-	default:
-		var ErrUnsupportedVersion = fmt.Errorf("unsupported version: %d", version)
-		return nil, ErrUnsupportedVersion
 	}
+
+	return txDetails, nil
 }
 
 func UnmarshalTxDetailsV0(data []byte) (*TxDetails, error) {

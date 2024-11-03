@@ -230,6 +230,9 @@ func (t *HistoricalPoseidonMerkleTree) UpdateLeaves(
 	_ = t.Storage.PushVersion(t.PoseidonMerkleTree.GetRoot(), leavesMap, tmpPreimages)
 
 	root = t.PoseidonMerkleTree.GetRoot()
+	/**
+	// t.Storage.historicalRoots = append(t.Storage.historicalRoots, root.String())
+	*/
 
 	return root, nil
 }
@@ -252,6 +255,14 @@ func (t *HistoricalPoseidonMerkleTree) LoadNodeHashes(indices []int) error {
 	}
 
 	leaves := make([]*PoseidonMerkleLeafWithIndex, 0, len(leavesMap))
+	/**
+	// for i := range indices {
+	// 	leaves[i] = &PoseidonMerkleLeafWithIndex{
+	// 		Index:    indices[i],
+	// 		LeafHash: leavesMap[indices[i]],
+	// 	}
+	// }
+	*/
 	for k, v := range leavesMap {
 		v := PoseidonMerkleLeafWithIndex{
 			Index:    k,
@@ -278,6 +289,10 @@ func (t *HistoricalPoseidonMerkleTree) updateLeaf(
 	leafHash *PoseidonHashOut,
 	cache map[string]*PreimageWithType,
 ) (string, error) {
+	/**
+	// t.LoadNodeHashes()
+	*/
+
 	t.PoseidonMerkleTree.updateLeaf(index, new(PoseidonHashOut).Set(leafHash))
 
 	nextUnusedIndex := t.Storage.NextUnusedIndex()
@@ -347,6 +362,10 @@ func (t *HistoricalPoseidonMerkleTree) updateLeaf(
 }
 
 func (t *HistoricalPoseidonMerkleTree) Prove(targetRoot *PoseidonHashOut, index int) (*PoseidonMerkleProof, error) {
+	/**
+	// t.LoadNodeHashes()
+	*/
+
 	nodeIndex := 1<<t.height + index
 
 	siblings := make([]*PoseidonHashOut, 0)
@@ -368,6 +387,9 @@ func (t *HistoricalPoseidonMerkleTree) Prove(targetRoot *PoseidonHashOut, index 
 		if err != nil {
 			return nil, err
 		}
+		/**
+		// fmt.Printf("preimage = %v\n", preimage)
+		*/
 
 		defaultChild := new(PoseidonHashOut)
 		err = defaultChild.FromString(preimage.DefaultChild)
@@ -473,13 +495,14 @@ func addCache(
 	return nil
 }
 
+// effectiveBits ...
 // log2Ceil
 func effectiveBits(n uint) uint32 {
 	if n == 0 {
 		return 0
 	}
 
-	b := uint32(0)
+	var b uint32
 	for n > 0 {
 		n >>= 1
 		b++

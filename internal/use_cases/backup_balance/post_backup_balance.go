@@ -3,11 +3,14 @@ package backup_balance
 import (
 	"context"
 	"encoding/binary"
+	intMaxAcc "intmax2-store-vault/internal/accounts"
 	"intmax2-store-vault/internal/block_validity_prover"
+	"intmax2-store-vault/internal/finite_field"
 	"intmax2-store-vault/internal/hash/goldenposeidon"
 	node "intmax2-store-vault/internal/pb/gen/store_vault_service/node"
 	intMaxTree "intmax2-store-vault/internal/tree"
 	intMaxTypes "intmax2-store-vault/internal/types"
+	"intmax2-store-vault/internal/use_cases/block_signature"
 	"math/big"
 
 	"github.com/iden3/go-iden3-crypto/ffg"
@@ -111,6 +114,23 @@ func (pis *BalancePublicInputs) Equal(other *BalancePublicInputs) bool {
 	return true
 }
 
+func VerifyEnoughBalanceProof(enoughBalanceProof *block_signature.Plonky2Proof) (*BalancePublicInputs, error) {
+	publicInputs := make([]ffg.Element, len(enoughBalanceProof.PublicInputs))
+	for i, publicInput := range enoughBalanceProof.PublicInputs {
+		publicInputs[i].SetUint64(publicInput)
+	}
+	decodedPublicInputs := new(BalancePublicInputs).FromPublicInputs(publicInputs)
+	err := decodedPublicInputs.Verify()
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: Verify verifier data in public inputs.
+
+	// TODO: Verify enough balance proof by using Balance Validity Prover.
+	return decodedPublicInputs, nil
+}
+
 func (pis *BalancePublicInputs) FromPublicInputs(publicInputs []ffg.Element) *BalancePublicInputs {
 	const startPrivateCommitmentIndex = uint256LimbSize
 	const lastTxHashIndex = startPrivateCommitmentIndex + goldenposeidon.NUM_HASH_OUT_ELTS
@@ -170,4 +190,51 @@ type UCPostBackupBalanceInput struct {
 // UseCasePostBackupBalance describes PostBackupBalance contract.
 type UseCasePostBackupBalance interface {
 	Do(ctx context.Context, input *UCPostBackupBalanceInput) (*node.BackupBalanceResponse_Data_Balance, error)
+}
+
+func MakeMessage(
+	user intMaxAcc.Address,
+	blockNumber uint32,
+	balanceProof []byte,
+	encryptedBalancePublicInputs []byte,
+	encryptedBalanceData []byte,
+	encryptedTxs [][]byte,
+	encryptedTransfers [][]byte,
+	encryptedDeposits [][]byte,
+) []ffg.Element {
+	const numAddressBytes = 32
+	buf := finite_field.NewBuffer(make([]ffg.Element, 0))
+	finite_field.WriteFixedSizeBytes(buf, user.Bytes(), numAddressBytes)
+	err := finite_field.WriteUint64(buf, uint64(blockNumber))
+	// blockNumber is uint32, so it should be safe to cast to uint64
+	if err != nil {
+		panic(err)
+	}
+	finite_field.WriteBytes(buf, balanceProof)
+	finite_field.WriteBytes(buf, encryptedBalancePublicInputs)
+	finite_field.WriteBytes(buf, encryptedBalanceData)
+
+	err = finite_field.WriteUint64(buf, uint64(len(encryptedTxs)))
+	if err != nil {
+		panic(err)
+	}
+	for _, tx := range encryptedTxs {
+		finite_field.WriteBytes(buf, tx)
+	}
+	err = finite_field.WriteUint64(buf, uint64(len(encryptedTransfers)))
+	if err != nil {
+		panic(err)
+	}
+	for _, transfer := range encryptedTransfers {
+		finite_field.WriteBytes(buf, transfer)
+	}
+	err = finite_field.WriteUint64(buf, uint64(len(encryptedDeposits)))
+	if err != nil {
+		panic(err)
+	}
+	for _, deposit := range encryptedDeposits {
+		finite_field.WriteBytes(buf, deposit)
+	}
+
+	return buf.Inner()
 }
