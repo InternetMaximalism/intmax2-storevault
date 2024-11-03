@@ -1,0 +1,70 @@
+networks:
+  intmax2-store-vault:
+
+services:
+  intmax2-store-vault-service:
+    container_name: intmax2-store-vault-service
+    image: 'intmax2-store-vault-service:dev'
+    working_dir: /app
+    command: sh -c "./intmax2-store-vault migrate --action up && ./intmax2-store-vault run"
+    env_file:
+      - env.docker.store-vault-server
+    restart: always
+    build:
+      context: ../
+      dockerfile: ./build/Dockerfile
+      args:
+        SWAGGER_HOST_URL: ${SWAGGER_HOST_URL}
+        SWAGGER_BASE_PATH: ${SWAGGER_BASE_PATH}
+    volumes:
+      - ../scripts/x509:/app/x509
+    networks:
+      - intmax2-store-vault
+    depends_on:
+      - intmax2-store-vault-ot-collector
+      - intmax2-store-vault-postgres
+    ports:
+      - '8782:80'
+      - '8783:10000'
+
+  intmax2-store-vault-postgres:
+    container_name: intmax2-store-vault-postgres
+    image: 'postgres:15.3-alpine3.17'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=state
+    ports:
+      - '15436:5432'
+    networks:
+      - intmax2-store-vault
+    volumes:
+      - ./sql_dbs/intmax2-store-vault-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  intmax2-store-vault-ot-collector:
+    container_name: intmax2-store-vault-ot-collector
+    image: "otel/opentelemetry-collector-contrib:0.37.1"
+    networks:
+      - intmax2-store-vault
+    ports:
+      - "4321:4317"        # OTLP gRPC receiver
+      - "4322:4318"        # OTLP HTTP receiver
+    volumes:
+      - ./open-telemetry-collector-config.yaml:/etc/otel/config.yaml
+    depends_on:
+      - intmax2-store-vault-jaeger-all-in-one
+
+  intmax2-store-vault-jaeger-all-in-one:
+    container_name: intmax2-store-vault-jaeger-all-in-one
+    image: "jaegertracing/all-in-one:latest"
+    networks:
+      - intmax2-store-vault
+    ports:
+      - "16886:16686"
+      - "14868:14268"
+      - "14850:14250"

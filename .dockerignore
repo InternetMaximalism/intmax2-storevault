@@ -1,0 +1,14 @@
+.vscode
+.idea
+.DS_Store
+build
+**/*.pb.go
+**/*.pb.gw.go
+**/*.gen.go
+intmax2-store-valut
+**/mock_*
+vendor
+.env
+docs/swagger/store_vault
+internal/pb/gen
+third_party/OpenAPI/store_vault_service/store_vault
