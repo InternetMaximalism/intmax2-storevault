@@ -12,7 +12,10 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func (s *StoreVaultServer) BackupTransfer(ctx context.Context, req *node.BackupTransferRequest) (*node.BackupTransferResponse, error) {
+func (s *StoreVaultServer) BackupTransfer(
+	ctx context.Context,
+	req *node.BackupTransferRequest,
+) (*node.BackupTransferResponse, error) {
 	resp := node.BackupTransferResponse{}
 
 	const (

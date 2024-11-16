@@ -2,16 +2,13 @@ package get_backup_deposits
 
 import (
 	"context"
+	"errors"
 	"intmax2-store-vault/configs"
 	"intmax2-store-vault/internal/logger"
 	"intmax2-store-vault/internal/open_telemetry"
-	node "intmax2-store-vault/internal/pb/gen/store_vault_service/node"
-	service "intmax2-store-vault/internal/store_vault_service"
 	getBackupDeposits "intmax2-store-vault/internal/use_cases/get_backup_deposits"
-	"intmax2-store-vault/pkg/sql_db/db_app/models"
 
 	"go.opentelemetry.io/otel/attribute"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // uc describes use case
@@ -35,12 +32,12 @@ func New(
 
 func (u *uc) Do(
 	ctx context.Context, input *getBackupDeposits.UCGetBackupDepositsInput,
-) (*node.GetBackupDepositsResponse_Data, error) {
+) (*getBackupDeposits.UCGetBackupDeposits, error) {
 	const (
-		hName           = "UseCase GetBackupDeposits"
-		recipientKey    = "recipient"
-		startBackupTime = "start_backup_time"
-		limitKey        = "limit"
+		hName               = "UseCase GetBackupDeposits"
+		senderKey           = "sender"
+		startBlockNumberKey = "start_block_number"
+		limitKey            = "limit"
 	)
 
 	spanCtx, span := open_telemetry.Tracer().Start(ctx, hName)
@@ -52,39 +49,33 @@ func (u *uc) Do(
 	}
 
 	span.SetAttributes(
+		attribute.String(senderKey, input.Sender),
+		attribute.Int64(startBlockNumberKey, int64(input.StartBlockNumber)),
 		attribute.Int64(limitKey, int64(input.Limit)),
 	)
 
-	deposits, err := service.GetBackupDeposits(ctx, u.cfg, u.log, u.db, input)
+	deposits, err := u.db.GetBackupDeposits("recipient", input.Sender)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrGetBackupDepositsFail, err)
 	}
 
-	data := node.GetBackupDepositsResponse_Data{
-		Deposits: generateBackupDeposits(deposits),
-		Meta: &node.GetBackupDepositsResponse_Meta{
+	result := getBackupDeposits.UCGetBackupDeposits{
+		Deposits: make([]*getBackupDeposits.UCGetBackupDepositsItem, len(deposits)),
+		Meta: &getBackupDeposits.UCGetBackupDepositsMeta{
 			StartBlockNumber: input.StartBlockNumber,
 			EndBlockNumber:   0,
 		},
 	}
 
-	return &data, nil
-}
-
-func generateBackupDeposits(deposits []*models.BackupDeposit) []*node.GetBackupDepositsResponse_Deposit {
-	results := make([]*node.GetBackupDepositsResponse_Deposit, 0, len(deposits))
-	for _, deposit := range deposits {
-		backupDeposit := &node.GetBackupDepositsResponse_Deposit{
-			Id:               deposit.ID,
-			Recipient:        deposit.Recipient,
-			BlockNumber:      uint64(deposit.BlockNumber),
-			EncryptedDeposit: deposit.EncryptedDeposit,
-			CreatedAt: &timestamppb.Timestamp{
-				Seconds: deposit.CreatedAt.Unix(),
-				Nanos:   int32(deposit.CreatedAt.Nanosecond()),
-			},
+	for key := range deposits {
+		result.Deposits[key] = &getBackupDeposits.UCGetBackupDepositsItem{
+			ID:               deposits[key].ID,
+			Recipient:        deposits[key].Recipient,
+			BlockNumber:      uint64(deposits[key].BlockNumber),
+			EncryptedDeposit: deposits[key].EncryptedDeposit,
+			CreatedAt:        deposits[key].CreatedAt,
 		}
-		results = append(results, backupDeposit)
 	}
-	return results
+
+	return &result, nil
 }

@@ -12,6 +12,7 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (s *StoreVaultServer) GetBackupDepositByHash(
@@ -42,16 +43,30 @@ func (s *StoreVaultServer) GetBackupDepositByHash(
 		return &resp, utils.BadRequest(spanCtx, err)
 	}
 
-	err = s.dbApp.Exec(spanCtx, nil, func(d interface{}, _ interface{}) (err error) {
+	var info getBackupDepositByHash.UCGetBackupDepositByHash
+	err = s.dbApp.Exec(spanCtx, &info, func(d interface{}, in interface{}) (err error) {
 		q, _ := d.(SQLDriverApp)
 
-		results, err := s.commands.GetBackupDepositByHash(s.config, s.log, q).Do(spanCtx, &input)
+		var result *getBackupDepositByHash.UCGetBackupDepositByHash
+		result, err = s.commands.GetBackupDepositByHash(s.config, s.log, q).Do(spanCtx, &input)
 		if err != nil {
 			open_telemetry.MarkSpanError(spanCtx, err)
-			const msg = "failed to get backup deposit: %w"
+			const msg = "failed to get backup deposit by hash: %w"
 			return fmt.Errorf(msg, err)
 		}
-		resp.Data = results
+
+		if v, ok := in.(*getBackupDepositByHash.UCGetBackupDepositByHash); ok {
+			v.ID = result.ID
+			v.Recipient = result.Recipient
+			v.BlockNumber = result.BlockNumber
+			v.EncryptedDeposit = result.EncryptedDeposit
+			v.CreatedAt = result.CreatedAt
+		} else {
+			const msg = "failed to convert of the backup deposit by hash"
+			err = fmt.Errorf(msg)
+			open_telemetry.MarkSpanError(spanCtx, err)
+			return err
+		}
 
 		return nil
 	})
@@ -60,11 +75,23 @@ func (s *StoreVaultServer) GetBackupDepositByHash(
 			return &resp, utils.NotFound(spanCtx, fmt.Errorf("%s", getBackupDepositByHash.NotFoundMessage))
 		}
 
-		const msg = "failed to get backup deposit with DB App: %+v"
+		const msg = "failed to get backup deposit by hash with DB App: %+v"
 		return &resp, utils.Internal(spanCtx, s.log, msg, err)
 	}
 
 	resp.Success = true
+	resp.Data = &node.GetBackupDepositByHashResponse_Data{
+		Deposit: &node.GetBackupDepositByHashResponse_Deposit{
+			Id:               info.ID,
+			Recipient:        info.Recipient,
+			BlockNumber:      info.BlockNumber,
+			EncryptedDeposit: info.EncryptedDeposit,
+			CreatedAt: &timestamppb.Timestamp{
+				Seconds: info.CreatedAt.Unix(),
+				Nanos:   int32(info.CreatedAt.Nanosecond()),
+			},
+		},
+	}
 
 	return &resp, utils.OK(spanCtx)
 }

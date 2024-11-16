@@ -2,16 +2,13 @@ package get_backup_transfers
 
 import (
 	"context"
+	"errors"
 	"intmax2-store-vault/configs"
 	"intmax2-store-vault/internal/logger"
 	"intmax2-store-vault/internal/open_telemetry"
-	node "intmax2-store-vault/internal/pb/gen/store_vault_service/node"
-	service "intmax2-store-vault/internal/store_vault_service"
 	getBackupTransfers "intmax2-store-vault/internal/use_cases/get_backup_transfers"
-	"intmax2-store-vault/pkg/sql_db/db_app/models"
 
 	"go.opentelemetry.io/otel/attribute"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // uc describes use case
@@ -35,7 +32,7 @@ func New(
 
 func (u *uc) Do(
 	ctx context.Context, input *getBackupTransfers.UCGetBackupTransfersInput,
-) (*node.GetBackupTransfersResponse_Data, error) {
+) (*getBackupTransfers.UCGetBackupTransfers, error) {
 	const (
 		hName               = "UseCase GetBackupTransfers"
 		senderKey           = "sender"
@@ -57,36 +54,28 @@ func (u *uc) Do(
 		attribute.Int64(limitKey, int64(input.Limit)),
 	)
 
-	transfers, err := service.GetBackupTransfers(ctx, u.cfg, u.log, u.db, input)
+	transfers, err := u.db.GetBackupTransfers("recipient", input.Sender)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrGetBackupTransfersFail, err)
 	}
 
-	data := node.GetBackupTransfersResponse_Data{
-		Transfers: generateBackupTransfers(transfers),
-		Meta: &node.GetBackupTransfersResponse_Meta{
+	result := getBackupTransfers.UCGetBackupTransfers{
+		Transfers: make([]*getBackupTransfers.UCGetBackupTransfersTrItem, len(transfers)),
+		Meta: &getBackupTransfers.UCGetBackupTransfersMeta{
 			StartBlockNumber: input.StartBlockNumber,
 			EndBlockNumber:   0,
 		},
 	}
 
-	return &data, nil
-}
-
-func generateBackupTransfers(transfers []*models.BackupTransfer) []*node.GetBackupTransfersResponse_Transfer {
-	results := make([]*node.GetBackupTransfersResponse_Transfer, 0, len(transfers))
 	for key := range transfers {
-		backupTransfer := &node.GetBackupTransfersResponse_Transfer{
-			Id:                transfers[key].ID,
-			Recipient:         transfers[key].Recipient,
+		result.Transfers[key] = &getBackupTransfers.UCGetBackupTransfersTrItem{
+			ID:                transfers[key].ID,
 			BlockNumber:       transfers[key].BlockNumber,
+			Recipient:         transfers[key].Recipient,
 			EncryptedTransfer: transfers[key].EncryptedTransfer,
-			CreatedAt: &timestamppb.Timestamp{
-				Seconds: transfers[key].CreatedAt.Unix(),
-				Nanos:   int32(transfers[key].CreatedAt.Nanosecond()),
-			},
+			CreatedAt:         transfers[key].CreatedAt,
 		}
-		results = append(results, backupTransfer)
 	}
-	return results
+
+	return &result, nil
 }

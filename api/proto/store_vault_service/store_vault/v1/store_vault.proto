@@ -16,7 +16,7 @@ option go_package = ".;store_vault";
 // These annotations are used when generating the OpenAPI file.
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   info: {
-    title: "INTMAX2 Store Vault"
+    title: "INTMAX2 Data Store Vault"
     version: "SWAGGER_VERSION"
     description: "### Definitions\n"
                  "The INTMAX2 Store Vault service.\n"

@@ -2,10 +2,30 @@ package get_backup_transactions
 
 import (
 	"context"
-	node "intmax2-store-vault/internal/pb/gen/store_vault_service/node"
+	"time"
 )
 
 //go:generate mockgen -destination=../mocks/mock_get_backup_transactions.go -package=mocks -source=get_backup_transactions.go
+
+type UCGeyBackupTransactionsItem struct {
+	ID              string
+	Sender          string
+	Signature       string
+	BlockNumber     uint64
+	EncryptedTx     string
+	EncodingVersion uint32
+	CreatedAt       time.Time
+}
+
+type UCGetBackupTransactionsMeta struct {
+	StartBlockNumber uint64
+	EndBlockNumber   uint64
+}
+
+type UCGetBackupTransactions struct {
+	Transactions []*UCGeyBackupTransactionsItem
+	Meta         *UCGetBackupTransactionsMeta
+}
 
 type UCGetBackupTransactionsInput struct {
 	Sender           string `json:"sender"`
@@ -15,5 +35,5 @@ type UCGetBackupTransactionsInput struct {
 
 // UseCaseGetBackupTransactions describes GetBackupTransactions contract.
 type UseCaseGetBackupTransactions interface {
-	Do(ctx context.Context, input *UCGetBackupTransactionsInput) (*node.GetBackupTransactionsResponse_Data, error)
+	Do(ctx context.Context, input *UCGetBackupTransactionsInput) (*UCGetBackupTransactions, error)
 }

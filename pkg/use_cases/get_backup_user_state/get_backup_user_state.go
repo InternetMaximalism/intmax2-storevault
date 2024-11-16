@@ -2,12 +2,13 @@ package get_backup_user_state
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"intmax2-store-vault/configs"
 	"intmax2-store-vault/internal/logger"
 	"intmax2-store-vault/internal/open_telemetry"
-	service "intmax2-store-vault/internal/store_vault_service"
+	intMaxTypes "intmax2-store-vault/internal/types"
 	getBackupUserState "intmax2-store-vault/internal/use_cases/get_backup_user_state"
+	mDBApp "intmax2-store-vault/pkg/sql_db/db_app/models"
 
 	"go.opentelemetry.io/otel/attribute"
 )
@@ -51,11 +52,30 @@ func (u *uc) Do(
 		attribute.String(userStateIDKey, input.UserStateID),
 	)
 
-	us, err := service.GetBackupUserState(ctx, u.cfg, u.log, u.db, input)
+	us, err := u.db.GetBackupUserState(input.UserStateID)
 	if err != nil {
-		open_telemetry.MarkSpanError(spanCtx, err)
-		return nil, fmt.Errorf("failed to get backup user state: %w", err)
+		return nil, errors.Join(ErrGetBackupUserStateFail, err)
 	}
 
-	return us, nil
+	var bpDB *mDBApp.BalanceProof
+	bpDB, err = u.db.GetBalanceProofByUserStateID(us.ID)
+	if err != nil {
+		return nil, errors.Join(ErrGetBalanceProofByUserStateIDFail, err)
+	}
+
+	var bp intMaxTypes.Plonky2Proof
+	err = bp.UnmarshalJSON(bpDB.BalanceProof)
+	if err != nil {
+		return nil, errors.Join(ErrUnmarshalPlonky2ProofWithBalanceProofFail, err)
+	}
+
+	return &getBackupUserState.UCGetBackupUserState{
+		ID:                 us.ID,
+		UserAddress:        us.UserAddress,
+		BalanceProof:       bp.ProofBase64String(),
+		EncryptedUserState: us.EncryptedUserState,
+		AuthSignature:      us.AuthSignature,
+		BlockNumber:        us.BlockNumber,
+		CreatedAt:          us.CreatedAt,
+	}, nil
 }

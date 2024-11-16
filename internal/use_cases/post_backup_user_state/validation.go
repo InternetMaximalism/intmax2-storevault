@@ -2,7 +2,7 @@ package post_backup_user_state
 
 import (
 	"errors"
-	bps "intmax2-store-vault/internal/balance_prover_service"
+	bpsTypes "intmax2-store-vault/internal/balance_prover_service/types"
 	intMaxTypes "intmax2-store-vault/internal/types"
 
 	"github.com/prodadidb/go-validation"
@@ -34,7 +34,7 @@ func (input *UCPostBackupUserStateInput) isBalanceProof() validation.Rule {
 			return ErrValueInvalid
 		}
 
-		_, err = new(bps.BalancePublicInputs).FromPublicInputs(bp.PublicInputs)
+		_, err = new(bpsTypes.BalancePublicInputs).FromPublicInputs(bp.PublicInputs)
 		if err != nil {
 			return ErrValueInvalid
 		}

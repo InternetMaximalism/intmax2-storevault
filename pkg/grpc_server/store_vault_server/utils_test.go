@@ -31,6 +31,7 @@ func Start(
 	dbApp server.SQLDriverApp,
 	hc *health.Handler,
 	sb server.ServiceBlockchain,
+	vdcs server.VerifyDepositConfirmationService,
 ) (gRPCServerStop func(), gwServer *http.Server) {
 	s := httptest.NewServer(nil)
 	s.Close()
@@ -54,7 +55,7 @@ func Start(
 		OptionsSuccessStatus: cfg.HTTP.CORSStatusCode,
 	})
 
-	srv := server.New(log, cfg, dbApp, commands, sb, cfg.HTTP.CookieForAuthUse, hc)
+	srv := server.New(log, cfg, dbApp, commands, sb, cfg.HTTP.CookieForAuthUse, hc, vdcs)
 	ctx = context.WithValue(ctx, consts.AppConfigs, cfg)
 
 	const (

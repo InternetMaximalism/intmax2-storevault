@@ -12,6 +12,7 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (s *StoreVaultServer) GetBackupTransferByHash(
@@ -42,16 +43,30 @@ func (s *StoreVaultServer) GetBackupTransferByHash(
 		return &resp, utils.BadRequest(spanCtx, err)
 	}
 
-	err = s.dbApp.Exec(spanCtx, nil, func(d interface{}, _ interface{}) (err error) {
+	var info getBackupTransferByHash.UCGetBackupTransferByHash
+	err = s.dbApp.Exec(spanCtx, &info, func(d interface{}, in interface{}) (err error) {
 		q, _ := d.(SQLDriverApp)
 
-		results, err := s.commands.GetBackupTransferByHash(s.config, s.log, q).Do(spanCtx, &input)
+		var result *getBackupTransferByHash.UCGetBackupTransferByHash
+		result, err = s.commands.GetBackupTransferByHash(s.config, s.log, q).Do(spanCtx, &input)
 		if err != nil {
 			open_telemetry.MarkSpanError(spanCtx, err)
-			const msg = "failed to get backup transfer: %w"
+			const msg = "failed to get backup transfer by hash: %w"
 			return fmt.Errorf(msg, err)
 		}
-		resp.Data = results
+
+		if v, ok := in.(*getBackupTransferByHash.UCGetBackupTransferByHash); ok {
+			v.ID = result.ID
+			v.BlockNumber = result.BlockNumber
+			v.Recipient = result.Recipient
+			v.EncryptedTransfer = result.EncryptedTransfer
+			v.CreatedAt = result.CreatedAt
+		} else {
+			const msg = "failed to convert of the backup transfer by hash"
+			err = fmt.Errorf(msg)
+			open_telemetry.MarkSpanError(spanCtx, err)
+			return err
+		}
 
 		return nil
 	})
@@ -65,6 +80,18 @@ func (s *StoreVaultServer) GetBackupTransferByHash(
 	}
 
 	resp.Success = true
+	resp.Data = &node.GetBackupTransferByHashResponse_Data{
+		Transfer: &node.GetBackupTransferByHashResponse_Transfer{
+			Id:                info.ID,
+			BlockNumber:       info.BlockNumber,
+			Recipient:         info.Recipient,
+			EncryptedTransfer: info.EncryptedTransfer,
+			CreatedAt: &timestamppb.Timestamp{
+				Seconds: info.CreatedAt.Unix(),
+				Nanos:   int32(info.CreatedAt.Nanosecond()),
+			},
+		},
+	}
 
 	return &resp, utils.OK(spanCtx)
 }

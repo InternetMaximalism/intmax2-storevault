@@ -15,6 +15,7 @@ type StoreVaultServer struct {
 	sb               ServiceBlockchain
 	cookieForAuthUse bool
 	hc               *health.Handler
+	vdcs             VerifyDepositConfirmationService
 }
 
 // New initializes a new Server struct.
@@ -26,6 +27,7 @@ func New(
 	sb ServiceBlockchain,
 	cookieForAuthUse bool,
 	hc *health.Handler,
+	vdcs VerifyDepositConfirmationService,
 ) *StoreVaultServer {
 	const (
 		srv  = "storeVaultServer"
@@ -40,6 +42,7 @@ func New(
 		sb:               sb,
 		cookieForAuthUse: cookieForAuthUse,
 		hc:               hc,
+		vdcs:             vdcs,
 	}
 }
 

@@ -3,8 +3,8 @@ package store_vault_server
 import (
 	"intmax2-store-vault/configs"
 	"intmax2-store-vault/internal/logger"
-	backupBalance "intmax2-store-vault/internal/use_cases/backup_balance"
-	backupBalanceProof "intmax2-store-vault/internal/use_cases/backup_balance_proof"
+	getBackupBalanceProofs "intmax2-store-vault/internal/use_cases/get_backup_balance_proofs"
+	getBackupBalances "intmax2-store-vault/internal/use_cases/get_backup_balances"
 	getBackupDepositByHash "intmax2-store-vault/internal/use_cases/get_backup_deposit_by_hash"
 	getBackupDeposits "intmax2-store-vault/internal/use_cases/get_backup_deposits"
 	getBackupDepositsList "intmax2-store-vault/internal/use_cases/get_backup_deposits_list"
@@ -15,12 +15,14 @@ import (
 	getBackupTransfers "intmax2-store-vault/internal/use_cases/get_backup_transfers"
 	getBackupTransfersList "intmax2-store-vault/internal/use_cases/get_backup_transfers_list"
 	getBackupUserState "intmax2-store-vault/internal/use_cases/get_backup_user_state"
+	getBalancesByAddress "intmax2-store-vault/internal/use_cases/get_balances_by_address"
+	getVerifyDepositConfirmation "intmax2-store-vault/internal/use_cases/get_verify_deposit_confirmation"
 	getVersion "intmax2-store-vault/internal/use_cases/get_version"
+	postBackupBalance "intmax2-store-vault/internal/use_cases/post_backup_balance"
 	postBackupDeposit "intmax2-store-vault/internal/use_cases/post_backup_deposit"
 	postBackupTransaction "intmax2-store-vault/internal/use_cases/post_backup_transaction"
 	postBackupTransfer "intmax2-store-vault/internal/use_cases/post_backup_transfer"
 	postBackupUserState "intmax2-store-vault/internal/use_cases/post_backup_user_state"
-	verifyDepositConfirmation "intmax2-store-vault/internal/use_cases/verify_deposit_confirmation"
 	ucGetBackupBalanceProofs "intmax2-store-vault/pkg/use_cases/get_backup_balance_proofs"
 	ucGetBackupBalances "intmax2-store-vault/pkg/use_cases/get_backup_balances"
 	ucGetBackupDepositByHash "intmax2-store-vault/pkg/use_cases/get_backup_deposit_by_hash"
@@ -33,8 +35,8 @@ import (
 	ucGetBackupTransfers "intmax2-store-vault/pkg/use_cases/get_backup_transfers"
 	ucGetBackupTransfersList "intmax2-store-vault/pkg/use_cases/get_backup_transfers_list"
 	ucGetBackupUserState "intmax2-store-vault/pkg/use_cases/get_backup_user_state"
-	ucGetBalances "intmax2-store-vault/pkg/use_cases/get_balances"
-	ucVerifyDepositConfirmation "intmax2-store-vault/pkg/use_cases/get_verify_deposit_confirmation"
+	ucGetBalancesByAddress "intmax2-store-vault/pkg/use_cases/get_balances_by_address"
+	ucGetVerifyDepositConfirmation "intmax2-store-vault/pkg/use_cases/get_verify_deposit_confirmation"
 	ucGetVersion "intmax2-store-vault/pkg/use_cases/get_version"
 	ucPostBackupBalance "intmax2-store-vault/pkg/use_cases/post_backup_balance"
 	ucPostBackupDeposit "intmax2-store-vault/pkg/use_cases/post_backup_deposit"
@@ -62,7 +64,11 @@ type Commands interface {
 		log logger.Logger,
 		db SQLDriverApp,
 	) postBackupDeposit.UseCasePostBackupDeposit
-	PostBackupBalance(cfg *configs.Config, log logger.Logger, db SQLDriverApp) backupBalance.UseCasePostBackupBalance
+	PostBackupBalance(
+		cfg *configs.Config,
+		log logger.Logger,
+		db SQLDriverApp,
+	) postBackupBalance.UseCasePostBackupBalance
 	PostBackupUserState(
 		cfg *configs.Config,
 		log logger.Logger,
@@ -113,10 +119,26 @@ type Commands interface {
 		log logger.Logger,
 		db SQLDriverApp,
 	) getBackupDepositByHash.UseCaseGetBackupDepositByHash
-	GetBackupBalances(cfg *configs.Config, log logger.Logger, db SQLDriverApp) backupBalance.UseCaseGetBackupBalances
-	GetBalances(cfg *configs.Config, log logger.Logger, db SQLDriverApp) backupBalance.UseCaseGetBalances
-	GetBackupSenderBalanceProofs(cfg *configs.Config, log logger.Logger, db SQLDriverApp) backupBalanceProof.UseCaseGetBackupBalanceProofs
-	GetVerifyDepositConfirmation(cfg *configs.Config, log logger.Logger, sb ServiceBlockchain) verifyDepositConfirmation.UseCaseGetVerifyDepositConfirmation
+	GetBackupBalances(
+		cfg *configs.Config,
+		log logger.Logger,
+		db SQLDriverApp,
+	) getBackupBalances.UseCaseGetBackupBalances
+	GetBalancesByAddress(
+		cfg *configs.Config,
+		log logger.Logger,
+		db SQLDriverApp,
+	) getBalancesByAddress.UseCaseGetBalancesByAddress
+	GetBackupSenderBalanceProofs(
+		cfg *configs.Config,
+		log logger.Logger,
+		db SQLDriverApp,
+	) getBackupBalanceProofs.UseCaseGetBackupBalanceProofs
+	GetVerifyDepositConfirmation(
+		cfg *configs.Config,
+		log logger.Logger,
+		vdcs VerifyDepositConfirmationService,
+	) getVerifyDepositConfirmation.UseCaseGetVerifyDepositConfirmation
 	GetBackupUserState(
 		cfg *configs.Config,
 		log logger.Logger,
@@ -158,7 +180,11 @@ func (c *commands) PostBackupDeposit(
 	return ucPostBackupDeposit.New(cfg, log, db)
 }
 
-func (c *commands) PostBackupBalance(cfg *configs.Config, log logger.Logger, db SQLDriverApp) backupBalance.UseCasePostBackupBalance {
+func (c *commands) PostBackupBalance(
+	cfg *configs.Config,
+	log logger.Logger,
+	db SQLDriverApp,
+) postBackupBalance.UseCasePostBackupBalance {
 	return ucPostBackupBalance.New(cfg, log, db)
 }
 
@@ -242,20 +268,36 @@ func (c *commands) GetBackupDepositByHash(
 	return ucGetBackupDepositByHash.New(cfg, log, db)
 }
 
-func (c *commands) GetBackupBalances(cfg *configs.Config, log logger.Logger, db SQLDriverApp) backupBalance.UseCaseGetBackupBalances {
+func (c *commands) GetBackupBalances(
+	cfg *configs.Config,
+	log logger.Logger,
+	db SQLDriverApp,
+) getBackupBalances.UseCaseGetBackupBalances {
 	return ucGetBackupBalances.New(cfg, log, db)
 }
 
-func (c *commands) GetBalances(cfg *configs.Config, log logger.Logger, db SQLDriverApp) backupBalance.UseCaseGetBalances {
-	return ucGetBalances.New(cfg, log, db)
+func (c *commands) GetBalancesByAddress(
+	cfg *configs.Config,
+	log logger.Logger,
+	db SQLDriverApp,
+) getBalancesByAddress.UseCaseGetBalancesByAddress {
+	return ucGetBalancesByAddress.New(cfg, log, db)
 }
 
-func (c *commands) GetBackupSenderBalanceProofs(cfg *configs.Config, log logger.Logger, db SQLDriverApp) backupBalanceProof.UseCaseGetBackupBalanceProofs {
+func (c *commands) GetBackupSenderBalanceProofs(
+	cfg *configs.Config,
+	log logger.Logger,
+	db SQLDriverApp,
+) getBackupBalanceProofs.UseCaseGetBackupBalanceProofs {
 	return ucGetBackupBalanceProofs.New(cfg, log, db)
 }
 
-func (c *commands) GetVerifyDepositConfirmation(cfg *configs.Config, log logger.Logger, sb ServiceBlockchain) verifyDepositConfirmation.UseCaseGetVerifyDepositConfirmation {
-	return ucVerifyDepositConfirmation.New(cfg, log, sb)
+func (c *commands) GetVerifyDepositConfirmation(
+	cfg *configs.Config,
+	log logger.Logger,
+	vdcs VerifyDepositConfirmationService,
+) getVerifyDepositConfirmation.UseCaseGetVerifyDepositConfirmation {
+	return ucGetVerifyDepositConfirmation.New(cfg, log, vdcs)
 }
 
 func (c *commands) GetBackupUserState(

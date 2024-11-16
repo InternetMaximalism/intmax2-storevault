@@ -2,15 +2,13 @@ package get_backup_transfer_by_hash
 
 import (
 	"context"
+	"errors"
 	"intmax2-store-vault/configs"
 	"intmax2-store-vault/internal/logger"
 	"intmax2-store-vault/internal/open_telemetry"
-	node "intmax2-store-vault/internal/pb/gen/store_vault_service/node"
-	service "intmax2-store-vault/internal/store_vault_service"
 	getBackupTransferByHash "intmax2-store-vault/internal/use_cases/get_backup_transfer_by_hash"
 
 	"go.opentelemetry.io/otel/attribute"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // uc describes use case
@@ -35,7 +33,7 @@ func New(
 func (u *uc) Do(
 	ctx context.Context,
 	input *getBackupTransferByHash.UCGetBackupTransferByHashInput,
-) (*node.GetBackupTransferByHashResponse_Data, error) {
+) (*getBackupTransferByHash.UCGetBackupTransferByHash, error) {
 	const (
 		hName           = "UseCase GetBackupTransferByHash"
 		recipientKey    = "recipient"
@@ -55,23 +53,18 @@ func (u *uc) Do(
 		attribute.String(recipientKey, input.Recipient),
 	)
 
-	transfer, err := service.GetBackupTransferByHash(ctx, u.cfg, u.log, u.db, input)
+	transfer, err := u.db.GetBackupTransferByRecipientAndTransferDoubleHash(input.Recipient, input.TransferHash)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrGetBackupTransferByRecipientAndTransferDoubleHashFail, err)
 	}
 
-	data := node.GetBackupTransferByHashResponse_Data{
-		Transfer: &node.GetBackupTransferByHashResponse_Transfer{
-			Id:                transfer.ID,
-			Recipient:         transfer.Recipient,
-			BlockNumber:       transfer.BlockNumber,
-			EncryptedTransfer: transfer.EncryptedTransfer,
-			CreatedAt: &timestamppb.Timestamp{
-				Seconds: transfer.CreatedAt.Unix(),
-				Nanos:   int32(transfer.CreatedAt.Nanosecond()),
-			},
-		},
+	result := getBackupTransferByHash.UCGetBackupTransferByHash{
+		ID:                transfer.ID,
+		BlockNumber:       transfer.BlockNumber,
+		Recipient:         transfer.Recipient,
+		EncryptedTransfer: transfer.EncryptedTransfer,
+		CreatedAt:         transfer.CreatedAt,
 	}
 
-	return &data, nil
+	return &result, nil
 }

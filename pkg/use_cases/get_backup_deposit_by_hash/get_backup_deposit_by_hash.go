@@ -2,15 +2,13 @@ package get_backup_deposit_by_hash
 
 import (
 	"context"
+	"errors"
 	"intmax2-store-vault/configs"
 	"intmax2-store-vault/internal/logger"
 	"intmax2-store-vault/internal/open_telemetry"
-	node "intmax2-store-vault/internal/pb/gen/store_vault_service/node"
-	service "intmax2-store-vault/internal/store_vault_service"
 	getBackupDepositByHash "intmax2-store-vault/internal/use_cases/get_backup_deposit_by_hash"
 
 	"go.opentelemetry.io/otel/attribute"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // uc describes use case
@@ -35,43 +33,36 @@ func New(
 func (u *uc) Do(
 	ctx context.Context,
 	input *getBackupDepositByHash.UCGetBackupDepositByHashInput,
-) (*node.GetBackupDepositByHashResponse_Data, error) {
+) (*getBackupDepositByHash.UCGetBackupDepositByHash, error) {
 	const (
-		hName     = "UseCase GetBackupTransactionByHash"
-		senderKey = "sender"
-		txHashKey = "tx_hash"
+		hName          = "UseCase GetBackupDepositByHash"
+		senderKey      = "sender"
+		depositHashKey = "deposit_hash"
 	)
 
 	spanCtx, span := open_telemetry.Tracer().Start(ctx, hName)
 	defer span.End()
 
 	if input == nil {
-		open_telemetry.MarkSpanError(spanCtx, ErrUCGetBackupTransactionByHashInputEmpty)
-		return nil, ErrUCGetBackupTransactionByHashInputEmpty
+		open_telemetry.MarkSpanError(spanCtx, ErrUCGetBackupDepositByHashInputEmpty)
+		return nil, ErrUCGetBackupDepositByHashInputEmpty
 	}
 
 	span.SetAttributes(
-		attribute.String(txHashKey, input.DepositHash),
+		attribute.String(depositHashKey, input.DepositHash),
 		attribute.String(senderKey, input.Recipient),
 	)
 
-	deposit, err := service.GetBackupDepositByHash(ctx, u.cfg, u.log, u.db, input)
+	deposit, err := u.db.GetBackupDepositByRecipientAndDepositDoubleHash(input.Recipient, input.DepositHash)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrGetBackupDepositByRecipientAndDepositDoubleHash, err)
 	}
 
-	data := node.GetBackupDepositByHashResponse_Data{
-		Deposit: &node.GetBackupDepositByHashResponse_Deposit{
-			Id:               deposit.ID,
-			Recipient:        deposit.Recipient,
-			BlockNumber:      uint64(deposit.BlockNumber),
-			EncryptedDeposit: deposit.EncryptedDeposit,
-			CreatedAt: &timestamppb.Timestamp{
-				Seconds: deposit.CreatedAt.Unix(),
-				Nanos:   int32(deposit.CreatedAt.Nanosecond()),
-			},
-		},
-	}
-
-	return &data, nil
+	return &getBackupDepositByHash.UCGetBackupDepositByHash{
+		ID:               deposit.ID,
+		Recipient:        deposit.Recipient,
+		BlockNumber:      uint64(deposit.BlockNumber),
+		EncryptedDeposit: deposit.EncryptedDeposit,
+		CreatedAt:        deposit.CreatedAt,
+	}, nil
 }

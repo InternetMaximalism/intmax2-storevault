@@ -2,16 +2,13 @@ package get_backup_transactions
 
 import (
 	"context"
+	"errors"
 	"intmax2-store-vault/configs"
 	"intmax2-store-vault/internal/logger"
 	"intmax2-store-vault/internal/open_telemetry"
-	node "intmax2-store-vault/internal/pb/gen/store_vault_service/node"
-	service "intmax2-store-vault/internal/store_vault_service"
-	getBackupTransaction "intmax2-store-vault/internal/use_cases/get_backup_transactions"
-	"intmax2-store-vault/pkg/sql_db/db_app/models"
+	getBackupTransactions "intmax2-store-vault/internal/use_cases/get_backup_transactions"
 
 	"go.opentelemetry.io/otel/attribute"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // uc describes use case
@@ -21,7 +18,7 @@ type uc struct {
 	db  SQLDriverApp
 }
 
-func New(cfg *configs.Config, log logger.Logger, db SQLDriverApp) getBackupTransaction.UseCaseGetBackupTransactions {
+func New(cfg *configs.Config, log logger.Logger, db SQLDriverApp) getBackupTransactions.UseCaseGetBackupTransactions {
 	return &uc{
 		cfg: cfg,
 		log: log,
@@ -30,8 +27,8 @@ func New(cfg *configs.Config, log logger.Logger, db SQLDriverApp) getBackupTrans
 }
 
 func (u *uc) Do(
-	ctx context.Context, input *getBackupTransaction.UCGetBackupTransactionsInput,
-) (*node.GetBackupTransactionsResponse_Data, error) {
+	ctx context.Context, input *getBackupTransactions.UCGetBackupTransactionsInput,
+) (*getBackupTransactions.UCGetBackupTransactions, error) {
 	const (
 		hName               = "UseCase GetBackupTransactions"
 		senderKey           = "sender"
@@ -48,42 +45,35 @@ func (u *uc) Do(
 	}
 
 	span.SetAttributes(
+		attribute.String(senderKey, input.Sender),
 		attribute.Int64(startBlockNumberKey, int64(input.StartBlockNumber)),
 		attribute.Int64(limitKey, int64(input.Limit)),
 	)
 
-	transactions, err := service.GetBackupTransactions(ctx, u.cfg, u.log, u.db, input)
+	transactions, err := u.db.GetBackupTransactions("sender", input.Sender)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrGetBackupTransactionsFail, err)
 	}
 
-	data := node.GetBackupTransactionsResponse_Data{
-		Transactions: generateBackupTransaction(transactions),
-		Meta: &node.GetBackupTransactionsResponse_Meta{
+	result := getBackupTransactions.UCGetBackupTransactions{
+		Transactions: make([]*getBackupTransactions.UCGeyBackupTransactionsItem, len(transactions)),
+		Meta: &getBackupTransactions.UCGetBackupTransactionsMeta{
 			StartBlockNumber: input.StartBlockNumber,
 			EndBlockNumber:   0,
 		},
 	}
 
-	return &data, nil
-}
-
-func generateBackupTransaction(transactions []*models.BackupTransaction) []*node.GetBackupTransactionsResponse_Transaction {
-	results := make([]*node.GetBackupTransactionsResponse_Transaction, 0, len(transactions))
 	for key := range transactions {
-		backupTransaction := &node.GetBackupTransactionsResponse_Transaction{
-			Id:              transactions[key].ID,
+		result.Transactions[key] = &getBackupTransactions.UCGeyBackupTransactionsItem{
+			ID:              transactions[key].ID,
 			Sender:          transactions[key].Sender,
 			Signature:       transactions[key].Signature,
 			BlockNumber:     uint64(transactions[key].BlockNumber),
 			EncryptedTx:     transactions[key].EncryptedTx,
 			EncodingVersion: uint32(transactions[key].EncodingVersion),
-			CreatedAt: &timestamppb.Timestamp{
-				Seconds: transactions[key].CreatedAt.Unix(),
-				Nanos:   int32(transactions[key].CreatedAt.Nanosecond()),
-			},
+			CreatedAt:       transactions[key].CreatedAt,
 		}
-		results = append(results, backupTransaction)
 	}
-	return results
+
+	return &result, nil
 }

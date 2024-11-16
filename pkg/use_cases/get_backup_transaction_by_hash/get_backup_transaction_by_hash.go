@@ -2,15 +2,13 @@ package get_backup_transaction_by_hash
 
 import (
 	"context"
+	"errors"
 	"intmax2-store-vault/configs"
 	"intmax2-store-vault/internal/logger"
 	"intmax2-store-vault/internal/open_telemetry"
-	node "intmax2-store-vault/internal/pb/gen/store_vault_service/node"
-	service "intmax2-store-vault/internal/store_vault_service"
 	getBackupTransactionByHash "intmax2-store-vault/internal/use_cases/get_backup_transaction_by_hash"
 
 	"go.opentelemetry.io/otel/attribute"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // uc describes use case
@@ -35,7 +33,7 @@ func New(
 func (u *uc) Do(
 	ctx context.Context,
 	input *getBackupTransactionByHash.UCGetBackupTransactionByHashInput,
-) (*node.GetBackupTransactionByHashResponse_Data, error) {
+) (*getBackupTransactionByHash.UCGetBackupTransactionByHash, error) {
 	const (
 		hName     = "UseCase GetBackupTransactionByHash"
 		senderKey = "sender"
@@ -55,24 +53,18 @@ func (u *uc) Do(
 		attribute.String(senderKey, input.Sender),
 	)
 
-	transaction, err := service.GetBackupTransactionByHash(ctx, u.cfg, u.log, u.db, input)
+	transaction, err := u.db.GetBackupTransactionBySenderAndTxDoubleHash(input.Sender, input.TxHash)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrGetBackupTransactionBySenderAndTxDoubleHashFail, err)
 	}
 
-	data := node.GetBackupTransactionByHashResponse_Data{
-		Transaction: &node.GetBackupTransactionByHashResponse_Transaction{
-			Id:          transaction.ID,
-			Sender:      transaction.Sender,
-			Signature:   transaction.Signature,
-			BlockNumber: uint64(transaction.BlockNumber),
-			EncryptedTx: transaction.EncryptedTx,
-			CreatedAt: &timestamppb.Timestamp{
-				Seconds: transaction.CreatedAt.Unix(),
-				Nanos:   int32(transaction.CreatedAt.Nanosecond()),
-			},
-		},
-	}
-
-	return &data, nil
+	return &getBackupTransactionByHash.UCGetBackupTransactionByHash{
+		ID:              transaction.ID,
+		Sender:          transaction.Sender,
+		Signature:       transaction.Signature,
+		BlockNumber:     uint64(transaction.BlockNumber),
+		EncryptedTx:     transaction.EncryptedTx,
+		EncodingVersion: uint32(transaction.EncodingVersion),
+		CreatedAt:       transaction.CreatedAt,
+	}, nil
 }

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"intmax2-store-vault/configs"
-	bps "intmax2-store-vault/internal/balance_prover_service"
+	bpsTypes "intmax2-store-vault/internal/balance_prover_service/types"
 	intMaxTypes "intmax2-store-vault/internal/types"
 	postBackupUserState "intmax2-store-vault/internal/use_cases/post_backup_user_state"
 	"intmax2-store-vault/pkg/logger"
@@ -51,7 +51,7 @@ func TestUseCasePostBackupUserState(t *testing.T) {
 	assert.NoError(t, err)
 	byteBP, err := bp.MarshalJSON()
 	assert.NoError(t, err)
-	pi, err := new(bps.BalancePublicInputs).FromPublicInputs(bp.PublicInputs)
+	pi, err := new(bpsTypes.BalancePublicInputs).FromPublicInputs(bp.PublicInputs)
 	assert.NoError(t, err)
 
 	cases := []struct {

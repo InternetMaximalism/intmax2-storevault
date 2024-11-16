@@ -2,11 +2,10 @@ package post_backup_deposit
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"intmax2-store-vault/configs"
 	"intmax2-store-vault/internal/logger"
 	"intmax2-store-vault/internal/open_telemetry"
-	service "intmax2-store-vault/internal/store_vault_service"
 	postBackupDeposit "intmax2-store-vault/internal/use_cases/post_backup_deposit"
 
 	"go.opentelemetry.io/otel/attribute"
@@ -53,9 +52,11 @@ func (u *uc) Do(
 		attribute.String(encryptedDepositKey, input.EncryptedDeposit),
 	)
 
-	err := service.PostBackupDeposit(ctx, u.cfg, u.log, u.db, input)
+	_, err := u.db.CreateBackupDeposit(
+		input.Recipient, input.DepositHash, input.EncryptedDeposit, input.BlockNumber,
+	)
 	if err != nil {
-		return fmt.Errorf("failed to post backup deposit: %w", err)
+		return errors.Join(ErrCreateBackupDepositFail, err)
 	}
 
 	return nil

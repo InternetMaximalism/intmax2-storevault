@@ -2,7 +2,7 @@ package get_backup_transfer_by_hash
 
 import (
 	"context"
-	node "intmax2-store-vault/internal/pb/gen/store_vault_service/node"
+	"time"
 )
 
 //go:generate mockgen -destination=../mocks/mock_get_backup_transfer_by_hash.go -package=mocks -source=get_backup_transfer_by_hash.go
@@ -10,6 +10,14 @@ import (
 const (
 	NotFoundMessage = "Transfer hash not found."
 )
+
+type UCGetBackupTransferByHash struct {
+	ID                string
+	BlockNumber       uint64
+	Recipient         string
+	EncryptedTransfer string
+	CreatedAt         time.Time
+}
 
 type UCGetBackupTransferByHashInput struct {
 	Recipient    string `json:"recipient"`
@@ -19,5 +27,5 @@ type UCGetBackupTransferByHashInput struct {
 type UseCaseGetBackupTransferByHash interface {
 	Do(
 		ctx context.Context, input *UCGetBackupTransferByHashInput,
-	) (*node.GetBackupTransferByHashResponse_Data, error)
+	) (*UCGetBackupTransferByHash, error)
 }

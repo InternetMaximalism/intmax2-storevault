@@ -2,12 +2,14 @@ package post_backup_user_state
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"intmax2-store-vault/configs"
+	bpsTypes "intmax2-store-vault/internal/balance_prover_service/types"
 	"intmax2-store-vault/internal/logger"
 	"intmax2-store-vault/internal/open_telemetry"
-	service "intmax2-store-vault/internal/store_vault_service"
+	intMaxTypes "intmax2-store-vault/internal/types"
 	postBackupUserState "intmax2-store-vault/internal/use_cases/post_backup_user_state"
+	mDBApp "intmax2-store-vault/pkg/sql_db/db_app/models"
 
 	"go.opentelemetry.io/otel/attribute"
 )
@@ -55,11 +57,54 @@ func (u *uc) Do(
 		attribute.Int64(blockNumberKey, input.BlockNumber),
 	)
 
-	us, err := service.PostBackupUserState(ctx, u.cfg, u.log, u.db, input)
+	bp, err := intMaxTypes.NewCompressedPlonky2ProofFromBase64String(input.BalanceProof)
 	if err != nil {
-		open_telemetry.MarkSpanError(spanCtx, err)
-		return nil, fmt.Errorf("failed to post backup user state: %w", err)
+		return nil, errors.Join(ErrCompressedPlonky2ProofFromBase64StringFail, err)
 	}
 
-	return us, nil
+	var bpi *bpsTypes.BalancePublicInputs
+	bpi, err = new(bpsTypes.BalancePublicInputs).FromPublicInputs(bp.PublicInputs)
+	if err != nil {
+		return nil, errors.Join(ErrBalancePublicInputsFromPublicInputsFail, err)
+	}
+
+	var bytesBP []byte
+	bytesBP, err = bp.MarshalJSON()
+	if err != nil {
+		return nil, errors.Join(ErrMarshalPlonky2ProofWithBalanceProofFail, err)
+	}
+
+	var us *mDBApp.UserState
+	us, err = u.db.CreateBackupUserState(
+		input.UserAddress,
+		input.EncryptedUserState,
+		input.AuthSignature,
+		input.BlockNumber,
+	)
+	if err != nil {
+		return nil, errors.Join(ErrCreateBackupUserStateFail, err)
+	}
+
+	var bpDB *mDBApp.BalanceProof
+	bpDB, err = u.db.CreateBalanceProof(
+		us.ID, input.UserAddress, bpi.PrivateCommitment.String(), input.BlockNumber, bytesBP,
+	)
+	if err != nil {
+		return nil, errors.Join(ErrCreateBalanceProofFail, err)
+	}
+
+	err = bp.UnmarshalJSON(bpDB.BalanceProof)
+	if err != nil {
+		return nil, errors.Join(ErrUnmarshalPlonky2ProofWithBalanceProofFail, err)
+	}
+
+	return &postBackupUserState.UCPostBackupUserState{
+		ID:                 us.ID,
+		UserAddress:        us.UserAddress,
+		BalanceProof:       bp.ProofBase64String(),
+		EncryptedUserState: us.EncryptedUserState,
+		AuthSignature:      us.AuthSignature,
+		BlockNumber:        us.BlockNumber,
+		CreatedAt:          us.CreatedAt,
+	}, nil
 }

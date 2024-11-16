@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "INTMAX2 Store Vault",
+    "title": "INTMAX2 Data Store Vault",
     "description": "### Definitions\nThe INTMAX2 Store Vault service.\n",
     "version": "SWAGGER_VERSION"
   },
@@ -751,14 +751,14 @@
     },
     "/v1/balances/{address}": {
       "get": {
-        "summary": "GetBalances retrieves balances for a given address",
-        "description": "## This method retrieves the balance for the provided address.",
-        "operationId": "StoreVaultService_GetBalances",
+        "summary": "GetBalancesByAddress retrieves balances for a given address",
+        "description": "## GetBalancesByAddress retrieves the balances for the provided address.",
+        "operationId": "StoreVaultService_GetBalancesByAddress",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1GetBalancesResponse"
+              "$ref": "#/definitions/v1GetBalancesByAddressResponse"
             }
           },
           "400": {
@@ -2340,9 +2340,12 @@
         }
       }
     },
-    "v1GetBalancesResponse": {
+    "v1GetBalancesByAddressResponse": {
       "type": "object",
       "properties": {
+        "success": {
+          "type": "boolean"
+        },
         "deposits": {
           "type": "array",
           "items": {
@@ -2368,7 +2371,7 @@
           "title": "The list of transactions"
         }
       },
-      "description": "The response message containing a list of token balances."
+      "description": "GetBalancesByAddressResponse returns the response message containing a list of token balances by address."
     },
     "v1GetVerifyDepositConfirmationResponse": {
       "type": "object",

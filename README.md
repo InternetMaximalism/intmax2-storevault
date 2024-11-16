@@ -1,4 +1,4 @@
-# INTMAX2 Store Vault
+# INTMAX2 Data Store Vault
 
 ## Requirements
 * Docker v24.0.2+;
@@ -112,6 +112,7 @@ Flags:
 |   | BLOCKCHAIN_ETHEREUM_NETWORK_RPC_URL                   |                                                                    | the Ethereum blockchain URL RPC                                                                                                            |
 | * | BLOCKCHAIN_ROLLUP_CONTRACT_ADDRESS                    |                                                                    | the Rollup Contract address in the Scroll blockchain                                                                                       |
 | * | BLOCKCHAIN_LIQUIDITY_CONTRACT_ADDRESS                 |                                                                    | the Liquidity Contract address in the Ethereum blockchain                                                                                  |
+|   | BLOCKCHAIN_LIQUIDITY_CONTRACT_DEPLOYED_BLOCK_NUMBER   | 0                                                                  | the block number when the Liquidity contract was deployed                                                                                  |
 |   | **LOG**                                               |                                                                    |                                                                                                                                            |
 |   | LOG_LEVEL                                             | debug                                                              | log level                                                                                                                                  |
 |   | IS_LOG_LINES                                          | false                                                              | whether log line number of code where log func called or not                                                                               |

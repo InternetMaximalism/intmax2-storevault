@@ -2,7 +2,7 @@ package get_backup_transaction_by_hash
 
 import (
 	"context"
-	node "intmax2-store-vault/internal/pb/gen/store_vault_service/node"
+	"time"
 )
 
 //go:generate mockgen -destination=../mocks/mock_get_backup_transaction_by_hash.go -package=mocks -source=get_backup_transaction_by_hash.go
@@ -10,6 +10,16 @@ import (
 const (
 	NotFoundMessage = "Transaction hash not found."
 )
+
+type UCGetBackupTransactionByHash struct {
+	ID              string
+	Sender          string
+	Signature       string
+	BlockNumber     uint64
+	EncryptedTx     string
+	EncodingVersion uint32
+	CreatedAt       time.Time
+}
 
 type UCGetBackupTransactionByHashInput struct {
 	Sender string `json:"sender"`
@@ -19,5 +29,5 @@ type UCGetBackupTransactionByHashInput struct {
 type UseCaseGetBackupTransactionByHash interface {
 	Do(
 		ctx context.Context, input *UCGetBackupTransactionByHashInput,
-	) (*node.GetBackupTransactionByHashResponse_Data, error)
+	) (*UCGetBackupTransactionByHash, error)
 }

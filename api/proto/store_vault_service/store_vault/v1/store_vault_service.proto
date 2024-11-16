@@ -746,10 +746,10 @@ service StoreVaultService {
     };
   }
 
-  // GetBalances retrieves balances for a given address
+  // GetBalancesByAddress retrieves balances for a given address
   //
-  // ## This method retrieves the balance for the provided address.
-  rpc GetBalances(GetBalancesRequest) returns (GetBalancesResponse) {
+  // ## GetBalancesByAddress retrieves the balances for the provided address.
+  rpc GetBalancesByAddress(GetBalancesByAddressRequest) returns (GetBalancesByAddressResponse) {
     option (google.api.http) = {
       get: "/v1/balances/{address}"
     };
@@ -1292,10 +1292,27 @@ message GetBackupDepositsListResponse {
   }
 }
 
-// GetBalanceRequest is the request message for GetBalances method.
-message GetBalancesRequest {
+// GetBalanceByAddressRequest is the request message for the balances for the provided address.
+message GetBalancesByAddressRequest {
   // The address to retrieve the balance for
   string address = 1;
+}
+
+// GetBalancesByAddressResponse returns the response message containing a list of token balances by address.
+message GetBalancesByAddressResponse {
+  bool success = 1;
+  // The list of deposits
+  repeated BackupDeposit deposits = 2;
+  // The list of transfers
+  repeated BackupTransfer transfers = 3;
+  // The list of transactions
+  repeated BackupTransaction transactions = 4;
+}
+
+message GetBackupBalancesRequest {
+  string sender = 1;
+  uint64 start_block_number = 2;
+  uint64 limit = 3;
 }
 
 message BackupDeposit {
@@ -1355,22 +1372,6 @@ message BackupBalanceResponse {
       google.protobuf.Timestamp created_at = 10;
     }
   }
-}
-
-// The response message containing a list of token balances.
-message GetBalancesResponse {
-  // The list of deposits
-  repeated BackupDeposit deposits = 1;
-  // The list of transfers
-  repeated BackupTransfer transfers = 2;
-  // The list of transactions
-  repeated BackupTransaction transactions = 3;
-}
-
-message GetBackupBalancesRequest {
-  string sender = 1;
-  uint64 start_block_number = 2;
-  uint64 limit = 3;
 }
 
 message GetBackupBalancesResponse {

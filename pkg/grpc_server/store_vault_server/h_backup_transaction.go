@@ -2,11 +2,9 @@ package store_vault_server
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"intmax2-store-vault/internal/open_telemetry"
 	node "intmax2-store-vault/internal/pb/gen/store_vault_service/node"
-	block_signature "intmax2-store-vault/internal/use_cases/block_signature"
 	postBackupTransaction "intmax2-store-vault/internal/use_cases/post_backup_transaction"
 	"intmax2-store-vault/pkg/grpc_server/utils"
 
@@ -31,40 +29,26 @@ func (s *StoreVaultServer) BackupTransaction(
 		))
 	defer span.End()
 
-	if req.SenderEnoughBalanceProofBody == nil {
-		const msg = "sender enough balance proof body is nil"
-		s.log.Errorf(msg)
-		err := errors.New(msg)
-		open_telemetry.MarkSpanError(spanCtx, err)
-		return &resp, utils.BadRequest(spanCtx, err)
+	input := postBackupTransaction.UCPostBackupTransactionInput{
+		TxHash:      req.TxHash,
+		EncryptedTx: req.EncryptedTx,
+		Sender:      req.Sender,
+		Signature:   req.Signature,
+		BlockNumber: uint32(req.BlockNumber),
 	}
 
-	senderEnoughBalanceProofBody := block_signature.EnoughBalanceProofBodyInput{
-		PrevBalanceProofBody:  req.SenderEnoughBalanceProofBody.PrevBalanceProof,
-		TransferStepProofBody: req.SenderEnoughBalanceProofBody.TransitionStepProof,
-	}
-	/**
-	// senderEnoughBalanceProofBody, err := senderLastBalanceProofBodyInput.EnoughBalanceProofBody()
-	// if err != nil {
-	// 	s.log.Errorf("failed to get enough balance proof body: %+v\n", err)
-	// 	open_telemetry.MarkSpanError(spanCtx, err)
-	// 	return &resp, utils.BadRequest(spanCtx, err)
-	// }
-	*/
-	input := postBackupTransaction.UCPostBackupTransactionInput{
-		TxHash:                       req.TxHash,
-		EncryptedTx:                  req.EncryptedTx,
-		SenderEnoughBalanceProofBody: &senderEnoughBalanceProofBody,
-		Sender:                       req.Sender,
-		Signature:                    req.Signature,
-		BlockNumber:                  uint32(req.BlockNumber),
-		// SenderLastBalanceProofBody:       senderLastBalanceProofBody.PrevBalanceProofBody,
-		// SenderBalanceTransitionProofBody: senderLastBalanceProofBody.TransferStepProofBody,
+	if req.SenderEnoughBalanceProofBody != nil {
+		input.SenderEnoughBalanceProofBody = &postBackupTransaction.UCPostBackupTransactionInputEnoughBalanceProofBody{
+			PrevBalanceProofBody:  req.SenderEnoughBalanceProofBody.PrevBalanceProof,
+			TransferStepProofBody: req.SenderEnoughBalanceProofBody.TransitionStepProof,
+		}
+
+		input.ConvertSenderEnoughBalanceProofBody =
+			&postBackupTransaction.UCPostBackupTransactionInputConvertEnoughBalanceProofBody{}
 	}
 
 	err := input.Valid()
 	if err != nil {
-		s.log.Errorf("failed to validate input: %+v\n", err)
 		open_telemetry.MarkSpanError(spanCtx, err)
 		return &resp, utils.BadRequest(spanCtx, err)
 	}
@@ -72,9 +56,8 @@ func (s *StoreVaultServer) BackupTransaction(
 	err = s.dbApp.Exec(spanCtx, nil, func(d interface{}, _ interface{}) (err error) {
 		q, _ := d.(SQLDriverApp)
 
-		_, err = s.commands.PostBackupTransaction(s.config, s.log, q).Do(spanCtx, &input)
+		err = s.commands.PostBackupTransaction(s.config, s.log, q).Do(spanCtx, &input)
 		if err != nil {
-			s.log.Errorf("failed to post backup transaction: %+v\n", err)
 			open_telemetry.MarkSpanError(spanCtx, err)
 			const msg = "failed to post backup transaction: %w"
 			return fmt.Errorf(msg, err)
@@ -83,7 +66,6 @@ func (s *StoreVaultServer) BackupTransaction(
 		return nil
 	})
 	if err != nil {
-		s.log.Errorf("failed to post backup transaction with DB App: %+v\n", err)
 		const msg = "failed to post backup transaction with DB App: %+v"
 		return &resp, utils.Internal(spanCtx, s.log, msg, err)
 	}
@@ -92,6 +74,7 @@ func (s *StoreVaultServer) BackupTransaction(
 	resp.Data = &node.BackupTransactionResponse_Data{Message: postBackupTransaction.SuccessMsg}
 
 	// TODO: Add sender enough balance proof body hash to response.
+	// input.ConvertSenderEnoughBalanceProofBody.Hash()
 
 	return &resp, utils.OK(spanCtx)
 }

@@ -2,10 +2,28 @@ package get_backup_transfers
 
 import (
 	"context"
-	node "intmax2-store-vault/internal/pb/gen/store_vault_service/node"
+	"time"
 )
 
 //go:generate mockgen -destination=../mocks/mock_get_backup_transfers.go -package=mocks -source=get_backup_transfers.go
+
+type UCGetBackupTransfersMeta struct {
+	StartBlockNumber uint64
+	EndBlockNumber   uint64
+}
+
+type UCGetBackupTransfersTrItem struct {
+	ID                string
+	BlockNumber       uint64
+	Recipient         string
+	EncryptedTransfer string
+	CreatedAt         time.Time
+}
+
+type UCGetBackupTransfers struct {
+	Transfers []*UCGetBackupTransfersTrItem
+	Meta      *UCGetBackupTransfersMeta
+}
 
 type UCGetBackupTransfersInput struct {
 	Sender           string `json:"sender"`
@@ -15,5 +33,5 @@ type UCGetBackupTransfersInput struct {
 
 // UseCaseGetBackupTransfers describes GetBackupTransfers contract.
 type UseCaseGetBackupTransfers interface {
-	Do(ctx context.Context, input *UCGetBackupTransfersInput) (*node.GetBackupTransfersResponse_Data, error)
+	Do(ctx context.Context, input *UCGetBackupTransfersInput) (*UCGetBackupTransfers, error)
 }
