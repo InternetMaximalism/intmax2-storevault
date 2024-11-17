@@ -201,16 +201,16 @@
         ]
       }
     },
-    "/v1/backups/deposit/{depositHash}": {
+    "/v1/backups/deposit/{uuid}": {
       "get": {
-        "summary": "GetBackupTransactionByHash processes a request for backup transaction by hash",
-        "description": "## This method handles the backup transaction by hash.",
-        "operationId": "StoreVaultService_GetBackupDepositByHash",
+        "summary": "GetBackupTransactionByUuid processes a request for backup transaction by uuid",
+        "description": "## GetBackupTransactionByUuid processes a request for backup transaction by uuid.",
+        "operationId": "StoreVaultService_GetBackupDepositByUuid",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1GetBackupDepositByHashResponse"
+              "$ref": "#/definitions/v1GetBackupDepositByUuidResponse"
             }
           },
           "400": {
@@ -228,7 +228,7 @@
         },
         "parameters": [
           {
-            "name": "depositHash",
+            "name": "uuid",
             "in": "path",
             "required": true,
             "type": "string"
@@ -418,16 +418,16 @@
         ]
       }
     },
-    "/v1/backups/transaction/{txHash}": {
+    "/v1/backups/transaction/{uuid}": {
       "get": {
-        "summary": "GetBackupTransactionByHash processes a request for backup transaction by hash",
-        "description": "## This method handles the backup transaction by hash.",
-        "operationId": "StoreVaultService_GetBackupTransactionByHash",
+        "summary": "GetBackupTransactionByUuid processes a request for backup transaction by uuid",
+        "description": "## GetBackupTransactionByUuid processes a request for backup transaction by uuid.",
+        "operationId": "StoreVaultService_GetBackupTransactionByUuid",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1GetBackupTransactionByHashResponse"
+              "$ref": "#/definitions/v1GetBackupTransactionByUuidResponse"
             }
           },
           "400": {
@@ -445,7 +445,7 @@
         },
         "parameters": [
           {
-            "name": "txHash",
+            "name": "uuid",
             "in": "path",
             "required": true,
             "type": "string"
@@ -591,16 +591,16 @@
         ]
       }
     },
-    "/v1/backups/transfer/{transferHash}": {
+    "/v1/backups/transfer/{uuid}": {
       "get": {
-        "summary": "GetBackupTransferByHash processes a request for backup transfer by hash",
-        "description": "## This method handles the backup transfer by hash.",
-        "operationId": "StoreVaultService_GetBackupTransferByHash",
+        "summary": "GetBackupTransferByUuid processes a request for backup transfer by uuid",
+        "description": "## GetBackupTransferByUuid processes a request for backup transfer by uuid.",
+        "operationId": "StoreVaultService_GetBackupTransferByUuid",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1GetBackupTransferByHashResponse"
+              "$ref": "#/definitions/v1GetBackupTransferByUuidResponse"
             }
           },
           "400": {
@@ -618,7 +618,7 @@
         },
         "parameters": [
           {
-            "name": "transferHash",
+            "name": "uuid",
             "in": "path",
             "required": true,
             "type": "string"
@@ -1445,29 +1445,29 @@
         }
       }
     },
-    "v1GetBackupDepositByHashResponse": {
+    "v1GetBackupDepositByUuidResponse": {
       "type": "object",
       "properties": {
         "success": {
           "type": "boolean"
         },
         "data": {
-          "$ref": "#/definitions/v1GetBackupDepositByHashResponseData"
+          "$ref": "#/definitions/v1GetBackupDepositByUuidResponseData"
         }
       }
     },
-    "v1GetBackupDepositByHashResponseData": {
+    "v1GetBackupDepositByUuidResponseData": {
       "type": "object",
       "properties": {
         "deposit": {
-          "$ref": "#/definitions/v1GetBackupDepositByHashResponseDeposit"
+          "$ref": "#/definitions/v1GetBackupDepositByUuidResponseDeposit"
         }
       }
     },
-    "v1GetBackupDepositByHashResponseDeposit": {
+    "v1GetBackupDepositByUuidResponseDeposit": {
       "type": "object",
       "properties": {
-        "id": {
+        "uuid": {
           "type": "string"
         },
         "recipient": {
@@ -1720,29 +1720,29 @@
         }
       }
     },
-    "v1GetBackupTransactionByHashResponse": {
+    "v1GetBackupTransactionByUuidResponse": {
       "type": "object",
       "properties": {
         "success": {
           "type": "boolean"
         },
         "data": {
-          "$ref": "#/definitions/v1GetBackupTransactionByHashResponseData"
+          "$ref": "#/definitions/v1GetBackupTransactionByUuidResponseData"
         }
       }
     },
-    "v1GetBackupTransactionByHashResponseData": {
+    "v1GetBackupTransactionByUuidResponseData": {
       "type": "object",
       "properties": {
         "transaction": {
-          "$ref": "#/definitions/v1GetBackupTransactionByHashResponseTransaction"
+          "$ref": "#/definitions/v1GetBackupTransactionByUuidResponseTransaction"
         }
       }
     },
-    "v1GetBackupTransactionByHashResponseTransaction": {
+    "v1GetBackupTransactionByUuidResponseTransaction": {
       "type": "object",
       "properties": {
-        "id": {
+        "uuid": {
           "type": "string"
         },
         "sender": {
@@ -2013,29 +2013,29 @@
         }
       }
     },
-    "v1GetBackupTransferByHashResponse": {
+    "v1GetBackupTransferByUuidResponse": {
       "type": "object",
       "properties": {
         "success": {
           "type": "boolean"
         },
         "data": {
-          "$ref": "#/definitions/v1GetBackupTransferByHashResponseData"
+          "$ref": "#/definitions/v1GetBackupTransferByUuidResponseData"
         }
       }
     },
-    "v1GetBackupTransferByHashResponseData": {
+    "v1GetBackupTransferByUuidResponseData": {
       "type": "object",
       "properties": {
         "transfer": {
-          "$ref": "#/definitions/v1GetBackupTransferByHashResponseTransfer"
+          "$ref": "#/definitions/v1GetBackupTransferByUuidResponseTransfer"
         }
       }
     },
-    "v1GetBackupTransferByHashResponseTransfer": {
+    "v1GetBackupTransferByUuidResponseTransfer": {
       "type": "object",
       "properties": {
-        "id": {
+        "uuid": {
           "type": "string"
         },
         "blockNumber": {

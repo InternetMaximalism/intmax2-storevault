@@ -68,16 +68,16 @@ func (p *pgx) GetBackupTransaction(condition, value string) (*mDBApp.BackupTrans
 	return &transaction, nil
 }
 
-func (p *pgx) GetBackupTransactionBySenderAndTxDoubleHash(sender, txDoubleHash string) (*mDBApp.BackupTransaction, error) {
+func (p *pgx) GetBackupTransactionByIDAndSender(id, sender string) (*mDBApp.BackupTransaction, error) {
 	const (
 		q = `
         SELECT id, sender, tx_double_hash, encrypted_tx, encoding_version, block_number, signature, created_at
         FROM backup_transactions
-        WHERE sender = $1 AND tx_double_hash = $2 `
+        WHERE id = $1 AND sender = $2 `
 	)
 
 	var b models.BackupTransaction
-	err := errPgx.Err(p.queryRow(p.ctx, q, sender, txDoubleHash).
+	err := errPgx.Err(p.queryRow(p.ctx, q, id, sender).
 		Scan(
 			&b.ID,
 			&b.Sender,

@@ -242,12 +242,12 @@ service StoreVaultService {
     };
   }
 
-  // GetBackupTransferByHash processes a request for backup transfer by hash
+  // GetBackupTransferByUuid processes a request for backup transfer by uuid
   //
-  // ## This method handles the backup transfer by hash.
-  rpc GetBackupTransferByHash(GetBackupTransferByHashRequest) returns (GetBackupTransferByHashResponse) {
+  // ## GetBackupTransferByUuid processes a request for backup transfer by uuid.
+  rpc GetBackupTransferByUuid(GetBackupTransferByUuidRequest) returns (GetBackupTransferByUuidResponse) {
     option (google.api.http) = {
-      get: "/v1/backups/transfer/{transfer_hash}"
+      get: "/v1/backups/transfer/{uuid}"
     };
   }
 
@@ -480,12 +480,12 @@ service StoreVaultService {
     };
   }
 
-  // GetBackupTransactionByHash processes a request for backup transaction by hash
+  // GetBackupTransactionByUuid processes a request for backup transaction by uuid
   //
-  // ## This method handles the backup transaction by hash.
-  rpc GetBackupTransactionByHash(GetBackupTransactionByHashRequest) returns (GetBackupTransactionByHashResponse) {
+  // ## GetBackupTransactionByUuid processes a request for backup transaction by uuid.
+  rpc GetBackupTransactionByUuid(GetBackupTransactionByUuidRequest) returns (GetBackupTransactionByUuidResponse) {
     option (google.api.http) = {
-      get: "/v1/backups/transaction/{tx_hash}"
+      get: "/v1/backups/transaction/{uuid}"
     };
   }
 
@@ -715,12 +715,12 @@ service StoreVaultService {
     };
   }
 
-  // GetBackupTransactionByHash processes a request for backup transaction by hash
+  // GetBackupTransactionByUuid processes a request for backup transaction by uuid
   //
-  // ## This method handles the backup transaction by hash.
-  rpc GetBackupDepositByHash(GetBackupDepositByHashRequest) returns (GetBackupDepositByHashResponse) {
+  // ## GetBackupTransactionByUuid processes a request for backup transaction by uuid.
+  rpc GetBackupDepositByUuid(GetBackupDepositByUuidRequest) returns (GetBackupDepositByUuidResponse) {
     option (google.api.http) = {
-      get: "/v1/backups/deposit/{deposit_hash}"
+      get: "/v1/backups/deposit/{uuid}"
     };
   }
 
@@ -926,12 +926,12 @@ message GetBackupTransfersListResponse {
   }
 }
 
-message GetBackupTransferByHashRequest {
+message GetBackupTransferByUuidRequest {
   string recipient = 1;
-  string transfer_hash = 2;
+  string uuid = 2;
 }
 
-message GetBackupTransferByHashResponse {
+message GetBackupTransferByUuidResponse {
   bool success = 1;
   Data data = 2;
 
@@ -940,7 +940,7 @@ message GetBackupTransferByHashResponse {
   }
 
   message Transfer {
-    string id = 1;
+    string uuid = 1;
     uint64 block_number = 2;
     string recipient = 3;
     string encrypted_transfer = 4;
@@ -1104,12 +1104,12 @@ message GetBackupTransactionsListResponse {
   }
 }
 
-message GetBackupTransactionByHashRequest {
+message GetBackupTransactionByUuidRequest {
   string sender = 1;
-  string tx_hash = 2;
+  string uuid = 2;
 }
 
-message GetBackupTransactionByHashResponse {
+message GetBackupTransactionByUuidResponse {
   bool success = 1;
   Data data = 2;
 
@@ -1118,7 +1118,7 @@ message GetBackupTransactionByHashResponse {
   }
 
   message Transaction {
-    string id = 1;
+    string uuid = 1;
     string sender = 2;
     string signature = 3;
     uint64 block_number = 4;
@@ -1128,12 +1128,12 @@ message GetBackupTransactionByHashResponse {
   }
 }
 
-message GetBackupDepositByHashRequest {
+message GetBackupDepositByUuidRequest {
   string recipient = 1;
-  string deposit_hash = 2;
+  string uuid = 2;
 }
 
-message GetBackupDepositByHashResponse {
+message GetBackupDepositByUuidResponse {
   bool success = 1;
   Data data = 2;
 
@@ -1142,7 +1142,7 @@ message GetBackupDepositByHashResponse {
   }
 
   message Deposit {
-    string id = 1;
+    string uuid = 1;
     string recipient = 2;
     uint64 block_number = 3;
     string encrypted_deposit = 4;

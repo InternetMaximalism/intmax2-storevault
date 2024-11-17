@@ -1,4 +1,4 @@
-package get_backup_transaction_by_hash
+package get_backup_transaction_by_uuid
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"intmax2-store-vault/configs"
 	"intmax2-store-vault/internal/logger"
 	"intmax2-store-vault/internal/open_telemetry"
-	getBackupTransactionByHash "intmax2-store-vault/internal/use_cases/get_backup_transaction_by_hash"
+	getBackupTransactionByUuid "intmax2-store-vault/internal/use_cases/get_backup_transaction_by_uuid"
 
 	"go.opentelemetry.io/otel/attribute"
 )
@@ -22,7 +22,7 @@ func New(
 	cfg *configs.Config,
 	log logger.Logger,
 	db SQLDriverApp,
-) getBackupTransactionByHash.UseCaseGetBackupTransactionByHash {
+) getBackupTransactionByUuid.UseCaseGetBackupTransactionByUuid {
 	return &uc{
 		cfg: cfg,
 		log: log,
@@ -32,34 +32,34 @@ func New(
 
 func (u *uc) Do(
 	ctx context.Context,
-	input *getBackupTransactionByHash.UCGetBackupTransactionByHashInput,
-) (*getBackupTransactionByHash.UCGetBackupTransactionByHash, error) {
+	input *getBackupTransactionByUuid.UCGetBackupTransactionByUuidInput,
+) (*getBackupTransactionByUuid.UCGetBackupTransactionByUuid, error) {
 	const (
-		hName     = "UseCase GetBackupTransactionByHash"
+		hName     = "UseCase GetBackupTransactionByUuid"
 		senderKey = "sender"
-		txHashKey = "tx_hash"
+		uuidKey   = "uuid"
 	)
 
 	spanCtx, span := open_telemetry.Tracer().Start(ctx, hName)
 	defer span.End()
 
 	if input == nil {
-		open_telemetry.MarkSpanError(spanCtx, ErrUCGetBackupTransactionByHashInputEmpty)
-		return nil, ErrUCGetBackupTransactionByHashInputEmpty
+		open_telemetry.MarkSpanError(spanCtx, ErrUCGetBackupTransactionByUuidInputEmpty)
+		return nil, ErrUCGetBackupTransactionByUuidInputEmpty
 	}
 
 	span.SetAttributes(
-		attribute.String(txHashKey, input.TxHash),
+		attribute.String(uuidKey, input.Uuid),
 		attribute.String(senderKey, input.Sender),
 	)
 
-	transaction, err := u.db.GetBackupTransactionBySenderAndTxDoubleHash(input.Sender, input.TxHash)
+	transaction, err := u.db.GetBackupTransactionByIDAndSender(input.Uuid, input.Sender)
 	if err != nil {
-		return nil, errors.Join(ErrGetBackupTransactionBySenderAndTxDoubleHashFail, err)
+		return nil, errors.Join(ErrGetBackupTransactionByIDAndSenderFail, err)
 	}
 
-	return &getBackupTransactionByHash.UCGetBackupTransactionByHash{
-		ID:              transaction.ID,
+	return &getBackupTransactionByUuid.UCGetBackupTransactionByUuid{
+		Uuid:            transaction.ID,
 		Sender:          transaction.Sender,
 		Signature:       transaction.Signature,
 		BlockNumber:     uint64(transaction.BlockNumber),

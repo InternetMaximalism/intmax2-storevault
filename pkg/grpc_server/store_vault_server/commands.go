@@ -5,13 +5,13 @@ import (
 	"intmax2-store-vault/internal/logger"
 	getBackupBalanceProofs "intmax2-store-vault/internal/use_cases/get_backup_balance_proofs"
 	getBackupBalances "intmax2-store-vault/internal/use_cases/get_backup_balances"
-	getBackupDepositByHash "intmax2-store-vault/internal/use_cases/get_backup_deposit_by_hash"
+	getBackupDepositByUuid "intmax2-store-vault/internal/use_cases/get_backup_deposit_by_uuid"
 	getBackupDeposits "intmax2-store-vault/internal/use_cases/get_backup_deposits"
 	getBackupDepositsList "intmax2-store-vault/internal/use_cases/get_backup_deposits_list"
-	getBackupTransactionByHash "intmax2-store-vault/internal/use_cases/get_backup_transaction_by_hash"
+	getBackupTransactionByUuid "intmax2-store-vault/internal/use_cases/get_backup_transaction_by_uuid"
 	getBackupTransactions "intmax2-store-vault/internal/use_cases/get_backup_transactions"
 	getBackupTransactionsList "intmax2-store-vault/internal/use_cases/get_backup_transactions_list"
-	getBackupTransferByHash "intmax2-store-vault/internal/use_cases/get_backup_transfer_by_hash"
+	getBackupTransferByUuid "intmax2-store-vault/internal/use_cases/get_backup_transfer_by_uuid"
 	getBackupTransfers "intmax2-store-vault/internal/use_cases/get_backup_transfers"
 	getBackupTransfersList "intmax2-store-vault/internal/use_cases/get_backup_transfers_list"
 	getBackupUserState "intmax2-store-vault/internal/use_cases/get_backup_user_state"
@@ -25,13 +25,13 @@ import (
 	postBackupUserState "intmax2-store-vault/internal/use_cases/post_backup_user_state"
 	ucGetBackupBalanceProofs "intmax2-store-vault/pkg/use_cases/get_backup_balance_proofs"
 	ucGetBackupBalances "intmax2-store-vault/pkg/use_cases/get_backup_balances"
-	ucGetBackupDepositByHash "intmax2-store-vault/pkg/use_cases/get_backup_deposit_by_hash"
+	ucGetBackupDepositByUuid "intmax2-store-vault/pkg/use_cases/get_backup_deposit_by_uuid"
 	ucGetBackupDeposits "intmax2-store-vault/pkg/use_cases/get_backup_deposits"
 	ucGetBackupDepositsList "intmax2-store-vault/pkg/use_cases/get_backup_deposits_list"
-	ucGetBackupTransactionByHash "intmax2-store-vault/pkg/use_cases/get_backup_transaction_by_hash"
+	ucGetBackupTransactionByUuid "intmax2-store-vault/pkg/use_cases/get_backup_transaction_by_uuid"
 	ucGetBackupTransactions "intmax2-store-vault/pkg/use_cases/get_backup_transactions"
 	ucGetBackupTransactionsList "intmax2-store-vault/pkg/use_cases/get_backup_transactions_list"
-	ucGetBackupTransferByHash "intmax2-store-vault/pkg/use_cases/get_backup_transfer_by_hash"
+	ucGetBackupTransferByUuid "intmax2-store-vault/pkg/use_cases/get_backup_transfer_by_uuid"
 	ucGetBackupTransfers "intmax2-store-vault/pkg/use_cases/get_backup_transfers"
 	ucGetBackupTransfersList "intmax2-store-vault/pkg/use_cases/get_backup_transfers_list"
 	ucGetBackupUserState "intmax2-store-vault/pkg/use_cases/get_backup_user_state"
@@ -84,11 +84,11 @@ type Commands interface {
 		log logger.Logger,
 		db SQLDriverApp,
 	) getBackupTransfersList.UseCaseGetBackupTransfersList
-	GetBackupTransferByHash(
+	GetBackupTransferByUuid(
 		cfg *configs.Config,
 		log logger.Logger,
 		db SQLDriverApp,
-	) getBackupTransferByHash.UseCaseGetBackupTransferByHash
+	) getBackupTransferByUuid.UseCaseGetBackupTransferByUuid
 	GetBackupTransactions(
 		cfg *configs.Config,
 		log logger.Logger,
@@ -99,11 +99,11 @@ type Commands interface {
 		log logger.Logger,
 		db SQLDriverApp,
 	) getBackupTransactionsList.UseCaseGetBackupTransactionsList
-	GetBackupTransactionByHash(
+	GetBackupTransactionByUuid(
 		cfg *configs.Config,
 		log logger.Logger,
 		db SQLDriverApp,
-	) getBackupTransactionByHash.UseCaseGetBackupTransactionByHash
+	) getBackupTransactionByUuid.UseCaseGetBackupTransactionByUuid
 	GetBackupDeposits(
 		cfg *configs.Config,
 		log logger.Logger,
@@ -114,11 +114,11 @@ type Commands interface {
 		log logger.Logger,
 		db SQLDriverApp,
 	) getBackupDepositsList.UseCaseGetBackupDepositsList
-	GetBackupDepositByHash(
+	GetBackupDepositByUuid(
 		cfg *configs.Config,
 		log logger.Logger,
 		db SQLDriverApp,
-	) getBackupDepositByHash.UseCaseGetBackupDepositByHash
+	) getBackupDepositByUuid.UseCaseGetBackupDepositByUuid
 	GetBackupBalances(
 		cfg *configs.Config,
 		log logger.Logger,
@@ -212,12 +212,12 @@ func (c *commands) GetBackupTransfersList(
 	return ucGetBackupTransfersList.New(cfg, log, db)
 }
 
-func (c *commands) GetBackupTransferByHash(
+func (c *commands) GetBackupTransferByUuid(
 	cfg *configs.Config,
 	log logger.Logger,
 	db SQLDriverApp,
-) getBackupTransferByHash.UseCaseGetBackupTransferByHash {
-	return ucGetBackupTransferByHash.New(cfg, log, db)
+) getBackupTransferByUuid.UseCaseGetBackupTransferByUuid {
+	return ucGetBackupTransferByUuid.New(cfg, log, db)
 }
 
 func (c *commands) GetBackupTransactions(
@@ -236,12 +236,12 @@ func (c *commands) GetBackupTransactionsList(
 	return ucGetBackupTransactionsList.New(cfg, log, db)
 }
 
-func (c *commands) GetBackupTransactionByHash(
+func (c *commands) GetBackupTransactionByUuid(
 	cfg *configs.Config,
 	log logger.Logger,
 	db SQLDriverApp,
-) getBackupTransactionByHash.UseCaseGetBackupTransactionByHash {
-	return ucGetBackupTransactionByHash.New(cfg, log, db)
+) getBackupTransactionByUuid.UseCaseGetBackupTransactionByUuid {
+	return ucGetBackupTransactionByUuid.New(cfg, log, db)
 }
 
 func (c *commands) GetBackupDeposits(
@@ -260,12 +260,12 @@ func (c *commands) GetBackupDepositsList(
 	return ucGetBackupDepositsList.New(cfg, log, db)
 }
 
-func (c *commands) GetBackupDepositByHash(
+func (c *commands) GetBackupDepositByUuid(
 	cfg *configs.Config,
 	log logger.Logger,
 	db SQLDriverApp,
-) getBackupDepositByHash.UseCaseGetBackupDepositByHash {
-	return ucGetBackupDepositByHash.New(cfg, log, db)
+) getBackupDepositByUuid.UseCaseGetBackupDepositByUuid {
+	return ucGetBackupDepositByUuid.New(cfg, log, db)
 }
 
 func (c *commands) GetBackupBalances(

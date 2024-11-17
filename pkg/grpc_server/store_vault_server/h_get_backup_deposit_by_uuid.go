@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"intmax2-store-vault/internal/open_telemetry"
 	node "intmax2-store-vault/internal/pb/gen/store_vault_service/node"
-	getBackupTransferByHash "intmax2-store-vault/internal/use_cases/get_backup_transfer_by_hash"
+	getBackupDepositByUuid "intmax2-store-vault/internal/use_cases/get_backup_deposit_by_uuid"
 	"intmax2-store-vault/pkg/grpc_server/utils"
 	errorsDB "intmax2-store-vault/pkg/sql_db/errors"
 
@@ -15,14 +15,14 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (s *StoreVaultServer) GetBackupTransferByHash(
+func (s *StoreVaultServer) GetBackupDepositByUuid(
 	ctx context.Context,
-	req *node.GetBackupTransferByHashRequest,
-) (*node.GetBackupTransferByHashResponse, error) {
-	resp := node.GetBackupTransferByHashResponse{}
+	req *node.GetBackupDepositByUuidRequest,
+) (*node.GetBackupDepositByUuidResponse, error) {
+	resp := node.GetBackupDepositByUuidResponse{}
 
 	const (
-		hName      = "Handler GetBackupTransferByHash"
+		hName      = "Handler GetBackupDepositByUuid"
 		requestKey = "request"
 	)
 
@@ -32,9 +32,9 @@ func (s *StoreVaultServer) GetBackupTransferByHash(
 		))
 	defer span.End()
 
-	input := getBackupTransferByHash.UCGetBackupTransferByHashInput{
-		Recipient:    req.Recipient,
-		TransferHash: req.TransferHash,
+	input := getBackupDepositByUuid.UCGetBackupDepositByUuidInput{
+		Recipient: req.Recipient,
+		Uuid:      req.Uuid,
 	}
 
 	err := input.Valid()
@@ -43,26 +43,26 @@ func (s *StoreVaultServer) GetBackupTransferByHash(
 		return &resp, utils.BadRequest(spanCtx, err)
 	}
 
-	var info getBackupTransferByHash.UCGetBackupTransferByHash
+	var info getBackupDepositByUuid.UCGetBackupDepositByUuid
 	err = s.dbApp.Exec(spanCtx, &info, func(d interface{}, in interface{}) (err error) {
 		q, _ := d.(SQLDriverApp)
 
-		var result *getBackupTransferByHash.UCGetBackupTransferByHash
-		result, err = s.commands.GetBackupTransferByHash(s.config, s.log, q).Do(spanCtx, &input)
+		var result *getBackupDepositByUuid.UCGetBackupDepositByUuid
+		result, err = s.commands.GetBackupDepositByUuid(s.config, s.log, q).Do(spanCtx, &input)
 		if err != nil {
 			open_telemetry.MarkSpanError(spanCtx, err)
-			const msg = "failed to get backup transfer by hash: %w"
+			const msg = "failed to get backup deposit by uuid: %w"
 			return fmt.Errorf(msg, err)
 		}
 
-		if v, ok := in.(*getBackupTransferByHash.UCGetBackupTransferByHash); ok {
-			v.ID = result.ID
-			v.BlockNumber = result.BlockNumber
+		if v, ok := in.(*getBackupDepositByUuid.UCGetBackupDepositByUuid); ok {
+			v.Uuid = result.Uuid
 			v.Recipient = result.Recipient
-			v.EncryptedTransfer = result.EncryptedTransfer
+			v.BlockNumber = result.BlockNumber
+			v.EncryptedDeposit = result.EncryptedDeposit
 			v.CreatedAt = result.CreatedAt
 		} else {
-			const msg = "failed to convert of the backup transfer by hash"
+			const msg = "failed to convert of the backup deposit by uuid"
 			err = fmt.Errorf(msg)
 			open_telemetry.MarkSpanError(spanCtx, err)
 			return err
@@ -72,20 +72,20 @@ func (s *StoreVaultServer) GetBackupTransferByHash(
 	})
 	if err != nil {
 		if errors.Is(err, errorsDB.ErrNotFound) {
-			return &resp, utils.NotFound(spanCtx, fmt.Errorf("%s", getBackupTransferByHash.NotFoundMessage))
+			return &resp, utils.NotFound(spanCtx, fmt.Errorf("%s", getBackupDepositByUuid.NotFoundMessage))
 		}
 
-		const msg = "failed to get backup transfer with DB App: %+v"
+		const msg = "failed to get backup deposit by uuid with DB App: %+v"
 		return &resp, utils.Internal(spanCtx, s.log, msg, err)
 	}
 
 	resp.Success = true
-	resp.Data = &node.GetBackupTransferByHashResponse_Data{
-		Transfer: &node.GetBackupTransferByHashResponse_Transfer{
-			Id:                info.ID,
-			BlockNumber:       info.BlockNumber,
-			Recipient:         info.Recipient,
-			EncryptedTransfer: info.EncryptedTransfer,
+	resp.Data = &node.GetBackupDepositByUuidResponse_Data{
+		Deposit: &node.GetBackupDepositByUuidResponse_Deposit{
+			Uuid:             info.Uuid,
+			Recipient:        info.Recipient,
+			BlockNumber:      info.BlockNumber,
+			EncryptedDeposit: info.EncryptedDeposit,
 			CreatedAt: &timestamppb.Timestamp{
 				Seconds: info.CreatedAt.Unix(),
 				Nanos:   int32(info.CreatedAt.Nanosecond()),

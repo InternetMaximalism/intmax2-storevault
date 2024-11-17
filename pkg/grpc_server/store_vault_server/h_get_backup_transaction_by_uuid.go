@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"intmax2-store-vault/internal/open_telemetry"
 	node "intmax2-store-vault/internal/pb/gen/store_vault_service/node"
-	getBackupTransactionByHash "intmax2-store-vault/internal/use_cases/get_backup_transaction_by_hash"
+	getBackupTransactionByUuid "intmax2-store-vault/internal/use_cases/get_backup_transaction_by_uuid"
 	"intmax2-store-vault/pkg/grpc_server/utils"
 	errorsDB "intmax2-store-vault/pkg/sql_db/errors"
 
@@ -15,14 +15,14 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (s *StoreVaultServer) GetBackupTransactionByHash(
+func (s *StoreVaultServer) GetBackupTransactionByUuid(
 	ctx context.Context,
-	req *node.GetBackupTransactionByHashRequest,
-) (*node.GetBackupTransactionByHashResponse, error) {
-	resp := node.GetBackupTransactionByHashResponse{}
+	req *node.GetBackupTransactionByUuidRequest,
+) (*node.GetBackupTransactionByUuidResponse, error) {
+	resp := node.GetBackupTransactionByUuidResponse{}
 
 	const (
-		hName      = "Handler GetBackupTransactionByHash"
+		hName      = "Handler GetBackupTransactionByUuid"
 		requestKey = "request"
 	)
 
@@ -32,9 +32,9 @@ func (s *StoreVaultServer) GetBackupTransactionByHash(
 		))
 	defer span.End()
 
-	input := getBackupTransactionByHash.UCGetBackupTransactionByHashInput{
+	input := getBackupTransactionByUuid.UCGetBackupTransactionByUuidInput{
 		Sender: req.Sender,
-		TxHash: req.TxHash,
+		Uuid:   req.Uuid,
 	}
 
 	err := input.Valid()
@@ -43,20 +43,20 @@ func (s *StoreVaultServer) GetBackupTransactionByHash(
 		return &resp, utils.BadRequest(spanCtx, err)
 	}
 
-	var info getBackupTransactionByHash.UCGetBackupTransactionByHash
+	var info getBackupTransactionByUuid.UCGetBackupTransactionByUuid
 	err = s.dbApp.Exec(spanCtx, &info, func(d interface{}, in interface{}) (err error) {
 		q, _ := d.(SQLDriverApp)
 
-		var result *getBackupTransactionByHash.UCGetBackupTransactionByHash
-		result, err = s.commands.GetBackupTransactionByHash(s.config, s.log, q).Do(spanCtx, &input)
+		var result *getBackupTransactionByUuid.UCGetBackupTransactionByUuid
+		result, err = s.commands.GetBackupTransactionByUuid(s.config, s.log, q).Do(spanCtx, &input)
 		if err != nil {
 			open_telemetry.MarkSpanError(spanCtx, err)
-			const msg = "failed to get backup transaction by hash: %w"
+			const msg = "failed to get backup transaction by uuid: %w"
 			return fmt.Errorf(msg, err)
 		}
 
-		if v, ok := in.(*getBackupTransactionByHash.UCGetBackupTransactionByHash); ok {
-			v.ID = result.ID
+		if v, ok := in.(*getBackupTransactionByUuid.UCGetBackupTransactionByUuid); ok {
+			v.Uuid = result.Uuid
 			v.Sender = result.Sender
 			v.Signature = result.Signature
 			v.BlockNumber = result.BlockNumber
@@ -64,7 +64,7 @@ func (s *StoreVaultServer) GetBackupTransactionByHash(
 			v.EncodingVersion = result.EncodingVersion
 			v.CreatedAt = result.CreatedAt
 		} else {
-			const msg = "failed to convert of the backup transaction by hash"
+			const msg = "failed to convert of the backup transaction by uuid"
 			err = fmt.Errorf(msg)
 			open_telemetry.MarkSpanError(spanCtx, err)
 			return err
@@ -74,17 +74,17 @@ func (s *StoreVaultServer) GetBackupTransactionByHash(
 	})
 	if err != nil {
 		if errors.Is(err, errorsDB.ErrNotFound) {
-			return &resp, utils.NotFound(spanCtx, fmt.Errorf("%s", getBackupTransactionByHash.NotFoundMessage))
+			return &resp, utils.NotFound(spanCtx, fmt.Errorf("%s", getBackupTransactionByUuid.NotFoundMessage))
 		}
 
-		const msg = "failed to get backup transactions with DB App: %+v"
+		const msg = "failed to get backup transactions by uuid with DB App: %+v"
 		return &resp, utils.Internal(spanCtx, s.log, msg, err)
 	}
 
 	resp.Success = true
-	resp.Data = &node.GetBackupTransactionByHashResponse_Data{
-		Transaction: &node.GetBackupTransactionByHashResponse_Transaction{
-			Id:              info.ID,
+	resp.Data = &node.GetBackupTransactionByUuidResponse_Data{
+		Transaction: &node.GetBackupTransactionByUuidResponse_Transaction{
+			Uuid:            info.Uuid,
 			Sender:          info.Sender,
 			Signature:       info.Signature,
 			BlockNumber:     info.BlockNumber,
