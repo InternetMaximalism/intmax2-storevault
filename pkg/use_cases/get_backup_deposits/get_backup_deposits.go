@@ -69,7 +69,7 @@ func (u *uc) Do(
 
 	for key := range deposits {
 		result.Deposits[key] = &getBackupDeposits.UCGetBackupDepositsItem{
-			ID:               deposits[key].ID,
+			Uuid:             deposits[key].ID,
 			Recipient:        deposits[key].Recipient,
 			BlockNumber:      uint64(deposits[key].BlockNumber),
 			EncryptedDeposit: deposits[key].EncryptedDeposit,

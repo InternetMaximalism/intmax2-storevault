@@ -8,6 +8,7 @@ import (
 
 	"github.com/holiman/uint256"
 	"github.com/prodadidb/go-validation"
+	"github.com/prodadidb/go-validation/is"
 )
 
 // ErrValueInvalid error: value must be valid.
@@ -80,23 +81,7 @@ func (input *UCGetBackupTransfersListInput) Valid() error {
 					}
 
 					return validation.ValidateStruct(&cursor,
-						validation.Field(&cursor.BlockNumber, validation.By(func(value interface{}) error {
-							var v string
-							v, ok = value.(string)
-							if !ok {
-								return ErrValueInvalid
-							}
-
-							var test uint256.Int
-							err := test.Scan(v)
-							if err != nil {
-								return ErrValueInvalid
-							}
-
-							input.Pagination.Cursor.ConvertBlockNumber = test.ToBig()
-
-							return nil
-						})),
+						validation.Field(&cursor.Uuid, validation.Required, is.UUID),
 						validation.Field(&cursor.SortingValue, validation.By(func(value interface{}) error {
 							var v string
 							v, ok = value.(string)
@@ -142,39 +127,16 @@ func validateFilter() validation.Rule {
 		return validation.ValidateStruct(&f,
 			validation.Field(&f.Relation, validation.Required, validation.In(mFL.RelationAnd, mFL.RelationOr)),
 			validation.Field(&f.DataField, validation.Required, validation.In(
-				mFL.DataFieldBlockNumber, mFL.DataFieldStartBackupTime,
+				mFL.DataFieldBackupStartTime,
 			)),
 			validation.Field(&f.Condition,
-				validation.When(f.DataField == mFL.DataFieldBlockNumber, validation.In(
-					mFL.ConditionIs,
-					mFL.ConditionGreaterThan, mFL.ConditionLessThan,
-					mFL.ConditionGreaterThanOrEqualTo, mFL.ConditionLessThanOrEqualTo,
-				)),
-				validation.When(f.DataField == mFL.DataFieldStartBackupTime, validation.In(
+				validation.When(f.DataField == mFL.DataFieldBackupStartTime, validation.In(
 					mFL.ConditionGreaterThan, mFL.ConditionLessThan,
 					mFL.ConditionGreaterThanOrEqualTo, mFL.ConditionLessThanOrEqualTo,
 				)),
 			),
 			validation.Field(&f.Value,
-				validation.When(f.DataField == mFL.DataFieldBlockNumber,
-					validation.Required,
-					validation.By(func(value interface{}) error {
-						var v string
-						v, ok = value.(string)
-						if !ok {
-							return ErrValueInvalid
-						}
-
-						var sID uint256.Int
-						err := sID.Scan(v)
-						if err != nil {
-							return ErrValueInvalid
-						}
-
-						return nil
-					}),
-				),
-				validation.When(f.DataField == mFL.DataFieldStartBackupTime,
+				validation.When(f.DataField == mFL.DataFieldBackupStartTime,
 					validation.Required,
 					validation.By(func(value interface{}) (err error) {
 						var v string

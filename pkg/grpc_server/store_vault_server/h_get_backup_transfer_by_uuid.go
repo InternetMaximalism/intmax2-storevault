@@ -1,3 +1,4 @@
+// nolint:dupl
 package store_vault_server
 
 import (
@@ -83,7 +84,6 @@ func (s *StoreVaultServer) GetBackupTransferByUuid(
 	resp.Data = &node.GetBackupTransferByUuidResponse_Data{
 		Transfer: &node.GetBackupTransferByUuidResponse_Transfer{
 			Uuid:              info.Uuid,
-			BlockNumber:       info.BlockNumber,
 			Recipient:         info.Recipient,
 			EncryptedTransfer: info.EncryptedTransfer,
 			CreatedAt: &timestamppb.Timestamp{

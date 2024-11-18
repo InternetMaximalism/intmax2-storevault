@@ -56,7 +56,7 @@ func (s *StoreVaultServer) GetBackupDepositsList(
 
 		if req.Pagination.Cursor != nil {
 			input.Pagination.Cursor = &getBackupDepositsList.UCGetBackupDepositsListCursorBase{
-				BlockNumber:  req.Pagination.Cursor.BlockNumber,
+				Uuid:         req.Pagination.Cursor.Uuid,
 				SortingValue: req.Pagination.Cursor.SortingValue,
 			}
 		}
@@ -107,24 +107,24 @@ func (s *StoreVaultServer) GetBackupDepositsList(
 		resp.Data.Pagination.Cursor = &node.GetBackupDepositsListResponse_Cursor{}
 		if list.Pagination.Cursor.Prev != nil {
 			resp.Data.Pagination.Cursor.Prev = &node.GetBackupDepositsListResponse_CursorBase{
-				BlockNumber:  list.Pagination.Cursor.Prev.BlockNumber,
+				Uuid:         list.Pagination.Cursor.Prev.Uuid,
 				SortingValue: list.Pagination.Cursor.Prev.SortingValue,
 			}
 		}
 		if list.Pagination.Cursor.Next != nil {
 			resp.Data.Pagination.Cursor.Next = &node.GetBackupDepositsListResponse_CursorBase{
-				BlockNumber:  list.Pagination.Cursor.Next.BlockNumber,
+				Uuid:         list.Pagination.Cursor.Next.Uuid,
 				SortingValue: list.Pagination.Cursor.Next.SortingValue,
 			}
 		}
 	} else if input.Pagination != nil && input.Pagination.Cursor != nil {
 		resp.Data.Pagination.Cursor = &node.GetBackupDepositsListResponse_Cursor{
 			Prev: &node.GetBackupDepositsListResponse_CursorBase{
-				BlockNumber:  input.Pagination.Cursor.BlockNumber,
+				Uuid:         input.Pagination.Cursor.Uuid,
 				SortingValue: input.Pagination.Cursor.SortingValue,
 			},
 			Next: &node.GetBackupDepositsListResponse_CursorBase{
-				BlockNumber:  input.Pagination.Cursor.BlockNumber,
+				Uuid:         input.Pagination.Cursor.Uuid,
 				SortingValue: input.Pagination.Cursor.SortingValue,
 			},
 		}
@@ -133,15 +133,14 @@ func (s *StoreVaultServer) GetBackupDepositsList(
 	resp.Data.Deposits = make([]*node.GetBackupDepositsListResponse_Deposit, len(list.List))
 	for key := range list.List {
 		resp.Data.Deposits[key] = &node.GetBackupDepositsListResponse_Deposit{
-			Id:               list.List[key].ID,
-			DepositHash:      list.List[key].DepositDoubleHash,
+			Uuid:             list.List[key].Uuid,
 			Recipient:        list.List[key].Recipient,
-			BlockNumber:      uint64(list.List[key].BlockNumber),
 			EncryptedDeposit: list.List[key].EncryptedDeposit,
 			CreatedAt: &timestamppb.Timestamp{
 				Seconds: list.List[key].CreatedAt.Unix(),
 				Nanos:   int32(list.List[key].CreatedAt.Nanosecond()),
 			},
+			SortingValue: list.List[key].SortingValue,
 		}
 	}
 

@@ -69,7 +69,7 @@ func (u *uc) Do(
 
 	for key := range transfers {
 		result.Transfers[key] = &getBackupTransfers.UCGetBackupTransfersTrItem{
-			ID:                transfers[key].ID,
+			Uuid:              transfers[key].ID,
 			BlockNumber:       transfers[key].BlockNumber,
 			Recipient:         transfers[key].Recipient,
 			EncryptedTransfer: transfers[key].EncryptedTransfer,

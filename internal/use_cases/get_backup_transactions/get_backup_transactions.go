@@ -8,7 +8,7 @@ import (
 //go:generate mockgen -destination=../mocks/mock_get_backup_transactions.go -package=mocks -source=get_backup_transactions.go
 
 type UCGeyBackupTransactionsItem struct {
-	ID              string
+	Uuid            string
 	Sender          string
 	Signature       string
 	BlockNumber     uint64

@@ -1,3 +1,4 @@
+// nolint:dupl
 package store_vault_server
 
 import (
@@ -84,12 +85,10 @@ func (s *StoreVaultServer) GetBackupTransactionByUuid(
 	resp.Success = true
 	resp.Data = &node.GetBackupTransactionByUuidResponse_Data{
 		Transaction: &node.GetBackupTransactionByUuidResponse_Transaction{
-			Uuid:            info.Uuid,
-			Sender:          info.Sender,
-			Signature:       info.Signature,
-			BlockNumber:     info.BlockNumber,
-			EncryptedTx:     info.EncryptedTx,
-			EncodingVersion: info.EncodingVersion,
+			Uuid:        info.Uuid,
+			Sender:      info.Sender,
+			Signature:   info.Signature,
+			EncryptedTx: info.EncryptedTx,
 			CreatedAt: &timestamppb.Timestamp{
 				Seconds: info.CreatedAt.Unix(),
 				Nanos:   int32(info.CreatedAt.Nanosecond()),

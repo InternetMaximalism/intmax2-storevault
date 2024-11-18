@@ -56,18 +56,13 @@ service StoreVaultService {
   // Option for `relation`: `and`, `or`
   //
   // Option for `dataField`:
-  //  * `block_number`
+  //  * `backup_start_time`
   //
   // Option condition by `dataField`:
-  //  * `block_number`: `lessThan`, `lessThanOrEqualTo`, `is`, `greaterThanOrEqualTo`, `greaterThan`.
-  //  * `start_backup_time`: `lessThan`, `lessThanOrEqualTo`, `greaterThanOrEqualTo`, `greaterThan`.
+  //  * `backup_start_time`: `lessThan`, `lessThanOrEqualTo`, `greaterThanOrEqualTo`, `greaterThan`.
   //
-  // Filter `block_number`: `lessThan`, `lessThanOrEqualTo`, `is`, `greaterThanOrEqualTo`, `greaterThan`:
-  //  * for filtering need set the value `value` with specified block number
-  //  example: `value` = `1` (`is`).
-  //
-  // Filter `start_backup_time`: `lessThan`, `lessThanOrEqualTo`, `greaterThanOrEqualTo`, `greaterThan`:
-  //  * for filtering need set the value `value` with specified the start backup time
+  // Filter `backup_start_time`: `lessThan`, `lessThanOrEqualTo`, `greaterThanOrEqualTo`, `greaterThan`:
+  //  * for filtering need set the value `value` with specified the backup start time
   //  example: `value` = `2024-06-10T22:00:00.123Z` (`lessThanOrEqualTo`).
   //
   // ** **
@@ -85,7 +80,7 @@ service StoreVaultService {
   //      "direction": "string",
   //      "perPage": "string",
   //      "cursor": {
-  //        "blockNumber": "string",
+  //        "uuid": "string",
   //        "sortingValue": "string"
   //      }
   //    }
@@ -101,11 +96,11 @@ service StoreVaultService {
   //      "perPage": "string",
   //      "cursor": {
   //        "prev": {
-  //          "blockNumber": "string",
+  //          "uuid": "string",
   //          "sortingValue": "string"
   //        },
   //        "next": {
-  //          "blockNumber": "string",
+  //          "uuid": "string",
   //          "sortingValue": "string"
   //        }
   //      }
@@ -137,11 +132,11 @@ service StoreVaultService {
   //      "perPage": "100",
   //      "cursor": {
   //        "prev": {
-  //          "blockNumber": "1",
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //          "sortingValue": "1"
   //        },
   //        "next": {
-  //          "blockNumber": "1",
+  //          "uuid": "25a5cb38-9374-47bb-8efb-74d7c3202dad",
   //          "sortingValue": "100"
   //        }
   //      }
@@ -151,7 +146,7 @@ service StoreVaultService {
   //      "perPage": "100",
   //      "direction": "next",
   //      "cursor": {
-  //        "blockNumber": "1",
+  //        "uuid": "25a5cb38-9374-47bb-8efb-74d7c3202dad",
   //        "sorting_value": "100"
   //      }
   //    }
@@ -169,11 +164,11 @@ service StoreVaultService {
   //      "perPage": "10",
   //      "cursor": {
   //        "prev": {
-  //          "blockNumber": "1",
+  //          "uuid": "5d31d229-3c1a-43d7-a5ae-eeca1c60f5f1",
   //          "sortingValue": "10"
   //        },
   //        "next": {
-  //          "blockNumber": "1",
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //          "sorting_value": "1"
   //        }
   //      }
@@ -183,7 +178,7 @@ service StoreVaultService {
   //      "perPage": "10",
   //      "direction": "next",
   //      "cursor": {
-  //        "blockNumber": "1",
+  //        "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //        "sortingValue": "1"
   //      }
   //    }
@@ -201,11 +196,11 @@ service StoreVaultService {
   //      "perPage": "10",
   //      "cursor": {
   //        "prev": {
-  //          "blockNumber": "1",
+  //          "uuid": "5d31d229-3c1a-43d7-a5ae-eeca1c60f5f1",
   //          "sortingValue": "10"
   //        },
   //        "next": {
-  //          "blockNumber": "1",
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //          "sorting_value": "1"
   //        }
   //      }
@@ -215,7 +210,7 @@ service StoreVaultService {
   //      "perPage": "10",
   //      "direction": "next",
   //      "cursor": {
-  //          "blockNumber": "1",
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //          "sortingValue": "1"
   //      }
   //    }
@@ -224,11 +219,11 @@ service StoreVaultService {
   //      "perPage": "10",
   //      "cursor": {
   //        "prev": {
-  //          "blockNumber": "1",
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //          "sortingValue": "1"
   //        },
   //        "next": {
-  //          "blockNumber": "1",
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //          "sortingValue": "1"
   //        }
   //      }
@@ -299,14 +294,14 @@ service StoreVaultService {
   // Option for `relation`: `and`, `or`
   //
   // Option for `dataField`:
-  //  * `block_number`
+  //  * `backup_start_time`
   //
   // Option condition by `dataField`:
-  //  * `block_number`: `lessThan`, `lessThanOrEqualTo`, `is`, `greaterThanOrEqualTo`, `greaterThan`.
+  //  * `backup_start_time`: `lessThan`, `lessThanOrEqualTo`, `greaterThanOrEqualTo`, `greaterThan`.
   //
-  // Filter `block_number`: `lessThan`, `lessThanOrEqualTo`, `is`, `greaterThanOrEqualTo`, `greaterThan`:
-  //  * for filtering need set the value `value` with specified block number
-  //  example: `value` = `1` (`is`).
+  // Filter `backup_start_time`: `lessThan`, `lessThanOrEqualTo`, `greaterThanOrEqualTo`, `greaterThan`:
+  //  * for filtering need set the value `value` with specified the backup start time
+  //  example: `value` = `2024-06-10T22:00:00.123Z` (`lessThanOrEqualTo`).
   //
   // ** **
   //
@@ -323,7 +318,7 @@ service StoreVaultService {
   //      "direction": "string",
   //      "perPage": "string",
   //      "cursor": {
-  //        "blockNumber": "string",
+  //        "uuid": "string",
   //        "sortingValue": "string"
   //      }
   //    }
@@ -339,11 +334,11 @@ service StoreVaultService {
   //      "perPage": "string",
   //      "cursor": {
   //        "prev": {
-  //          "blockNumber": "string",
+  //          "uuid": "string",
   //          "sortingValue": "string"
   //        },
   //        "next": {
-  //          "blockNumber": "string",
+  //          "uuid": "string",
   //          "sortingValue": "string"
   //        }
   //      }
@@ -375,11 +370,11 @@ service StoreVaultService {
   //      "perPage": "100",
   //      "cursor": {
   //        "prev": {
-  //          "blockNumber": "1",
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //          "sortingValue": "1"
   //        },
   //        "next": {
-  //          "blockNumber": "1",
+  //          "uuid": "25a5cb38-9374-47bb-8efb-74d7c3202dad",
   //          "sortingValue": "100"
   //        }
   //      }
@@ -389,7 +384,7 @@ service StoreVaultService {
   //      "perPage": "100",
   //      "direction": "next",
   //      "cursor": {
-  //        "blockNumber": "1",
+  //        "uuid": "25a5cb38-9374-47bb-8efb-74d7c3202dad",
   //        "sorting_value": "100"
   //      }
   //    }
@@ -407,11 +402,11 @@ service StoreVaultService {
   //      "perPage": "10",
   //      "cursor": {
   //        "prev": {
-  //          "blockNumber": "1",
+  //          "uuid": "5d31d229-3c1a-43d7-a5ae-eeca1c60f5f1",
   //          "sortingValue": "10"
   //        },
   //        "next": {
-  //          "blockNumber": "1",
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //          "sorting_value": "1"
   //        }
   //      }
@@ -421,7 +416,7 @@ service StoreVaultService {
   //      "perPage": "10",
   //      "direction": "next",
   //      "cursor": {
-  //        "blockNumber": "1",
+  //        "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //        "sortingValue": "1"
   //      }
   //    }
@@ -439,11 +434,11 @@ service StoreVaultService {
   //      "perPage": "10",
   //      "cursor": {
   //        "prev": {
-  //          "blockNumber": "1",
+  //          "uuid": "5d31d229-3c1a-43d7-a5ae-eeca1c60f5f1",
   //          "sortingValue": "10"
   //        },
   //        "next": {
-  //          "blockNumber": "1",
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //          "sorting_value": "1"
   //        }
   //      }
@@ -453,7 +448,7 @@ service StoreVaultService {
   //      "perPage": "10",
   //      "direction": "next",
   //      "cursor": {
-  //          "blockNumber": "1",
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //          "sortingValue": "1"
   //      }
   //    }
@@ -462,11 +457,11 @@ service StoreVaultService {
   //      "perPage": "10",
   //      "cursor": {
   //        "prev": {
-  //          "blockNumber": "1",
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //          "sortingValue": "1"
   //        },
   //        "next": {
-  //          "blockNumber": "1",
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //          "sortingValue": "1"
   //        }
   //      }
@@ -534,14 +529,14 @@ service StoreVaultService {
   // Option for `relation`: `and`, `or`
   //
   // Option for `dataField`:
-  //  * `block_number`
+  //  * `backup_start_time`
   //
   // Option condition by `dataField`:
-  //  * `block_number`: `lessThan`, `lessThanOrEqualTo`, `is`, `greaterThanOrEqualTo`, `greaterThan`.
+  //  * `backup_start_time`: `lessThan`, `lessThanOrEqualTo`, `greaterThanOrEqualTo`, `greaterThan`.
   //
-  // Filter `block_number`: `lessThan`, `lessThanOrEqualTo`, `is`, `greaterThanOrEqualTo`, `greaterThan`:
-  //  * for filtering need set the value `value` with specified block number
-  //  example: `value` = `1` (`is`).
+  // Filter `backup_start_time`: `lessThan`, `lessThanOrEqualTo`, `greaterThanOrEqualTo`, `greaterThan`:
+  //  * for filtering need set the value `value` with specified the backup start time
+  //  example: `value` = `2024-06-10T22:00:00.123Z` (`lessThanOrEqualTo`).
   //
   // ** **
   //
@@ -558,7 +553,7 @@ service StoreVaultService {
   //      "direction": "string",
   //      "perPage": "string",
   //      "cursor": {
-  //        "blockNumber": "string",
+  //        "uuid": "string",
   //        "sortingValue": "string"
   //      }
   //    }
@@ -574,11 +569,11 @@ service StoreVaultService {
   //      "perPage": "string",
   //      "cursor": {
   //        "prev": {
-  //          "blockNumber": "string",
+  //          "uuid": "string",
   //          "sortingValue": "string"
   //        },
   //        "next": {
-  //          "blockNumber": "string",
+  //          "uuid": "string",
   //          "sortingValue": "string"
   //        }
   //      }
@@ -610,11 +605,11 @@ service StoreVaultService {
   //      "perPage": "100",
   //      "cursor": {
   //        "prev": {
-  //          "blockNumber": "1",
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //          "sortingValue": "1"
   //        },
   //        "next": {
-  //          "blockNumber": "1",
+  //          "uuid": "25a5cb38-9374-47bb-8efb-74d7c3202dad",
   //          "sortingValue": "100"
   //        }
   //      }
@@ -624,7 +619,7 @@ service StoreVaultService {
   //      "perPage": "100",
   //      "direction": "next",
   //      "cursor": {
-  //        "blockNumber": "1",
+  //        "uuid": "25a5cb38-9374-47bb-8efb-74d7c3202dad",
   //        "sorting_value": "100"
   //      }
   //    }
@@ -642,11 +637,11 @@ service StoreVaultService {
   //      "perPage": "10",
   //      "cursor": {
   //        "prev": {
-  //          "blockNumber": "1",
+  //          "uuid": "5d31d229-3c1a-43d7-a5ae-eeca1c60f5f1",
   //          "sortingValue": "10"
   //        },
   //        "next": {
-  //          "blockNumber": "1",
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //          "sorting_value": "1"
   //        }
   //      }
@@ -656,7 +651,7 @@ service StoreVaultService {
   //      "perPage": "10",
   //      "direction": "next",
   //      "cursor": {
-  //        "blockNumber": "1",
+  //        "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //        "sortingValue": "1"
   //      }
   //    }
@@ -674,11 +669,11 @@ service StoreVaultService {
   //      "perPage": "10",
   //      "cursor": {
   //        "prev": {
-  //          "blockNumber": "1",
+  //          "uuid": "5d31d229-3c1a-43d7-a5ae-eeca1c60f5f1",
   //          "sortingValue": "10"
   //        },
   //        "next": {
-  //          "blockNumber": "1",
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //          "sorting_value": "1"
   //        }
   //      }
@@ -688,7 +683,7 @@ service StoreVaultService {
   //      "perPage": "10",
   //      "direction": "next",
   //      "cursor": {
-  //          "blockNumber": "1",
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //          "sortingValue": "1"
   //      }
   //    }
@@ -697,11 +692,11 @@ service StoreVaultService {
   //      "perPage": "10",
   //      "cursor": {
   //        "prev": {
-  //          "blockNumber": "1",
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //          "sortingValue": "1"
   //        },
   //        "next": {
-  //          "blockNumber": "1",
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
   //          "sortingValue": "1"
   //        }
   //      }
@@ -821,8 +816,7 @@ message GetBackupTransfersResponse {
   }
 
   message Transfer {
-    string id = 1;
-    uint64 block_number = 2;
+    string uuid = 1;
     string recipient = 3;
     string encrypted_transfer = 4;
     google.protobuf.Timestamp created_at = 5;
@@ -863,9 +857,9 @@ message GetBackupTransfersListRequest {
   }
 
   message CursorBase {
-    // the number of block
-    // example = "1"
-    string block_number = 10;
+    // the uuid of the backup transfer
+    // example = "1bf0fc62-d119-4059-8c96-499d6c95544e"
+    string uuid = 10;
     // cursor of next/prev sorting value by pagination
     // example = "1"
     string sorting_value = 20;
@@ -909,20 +903,20 @@ message GetBackupTransfersListResponse {
   }
 
   message CursorBase {
-    // the number of block
-    // example = "1"
-    string block_number = 10;
+    // the uuid of the backup transfer
+    // example = "1bf0fc62-d119-4059-8c96-499d6c95544e"
+    string uuid = 10;
     // cursor of next/prev sorting value by pagination
     // example = "1"
     string sorting_value = 20;
   }
 
   message Transfer {
-    string id = 1;
-    uint64 block_number = 2;
+    string uuid = 1;
     string recipient = 3;
     string encrypted_transfer = 4;
     google.protobuf.Timestamp created_at = 5;
+    string sorting_value = 20;
   }
 }
 
@@ -941,7 +935,6 @@ message GetBackupTransferByUuidResponse {
 
   message Transfer {
     string uuid = 1;
-    uint64 block_number = 2;
     string recipient = 3;
     string encrypted_transfer = 4;
     google.protobuf.Timestamp created_at = 5;
@@ -1000,12 +993,10 @@ message GetBackupTransactionsResponse {
   }
 
   message Transaction {
-    string id = 1;
+    string uuid = 1;
     string sender = 2;
     string signature = 3;
-    uint64 block_number = 4;
     string encrypted_tx = 5;
-    uint32 encoding_version = 6;
     google.protobuf.Timestamp created_at = 7;
   }
 
@@ -1039,9 +1030,9 @@ message GetBackupTransactionsListRequest {
   }
 
   message CursorBase {
-    // the number of block
-    // example = "1"
-    string block_number = 10;
+    // the uuid of the backup transaction
+    // example = "1bf0fc62-d119-4059-8c96-499d6c95544e"
+    string uuid = 10;
     // cursor of next/prev sorting value by pagination
     // example = "1"
     string sorting_value = 20;
@@ -1085,22 +1076,21 @@ message GetBackupTransactionsListResponse {
   }
 
   message CursorBase {
-    // the number of block
-    // example = "1"
-    string block_number = 10;
+    // the uuid of the backup transaction
+    // example = "1bf0fc62-d119-4059-8c96-499d6c95544e"
+    string uuid = 10;
     // cursor of next/prev sorting value by pagination
     // example = "1"
     string sorting_value = 20;
   }
 
   message Transaction {
-    string id = 1;
+    string uuid = 1;
     string sender = 2;
     string signature = 3;
-    uint64 block_number = 4;
     string encrypted_tx = 5;
-    uint32 encoding_version = 6;
     google.protobuf.Timestamp created_at = 7;
+    string sorting_value = 20;
   }
 }
 
@@ -1121,9 +1111,7 @@ message GetBackupTransactionByUuidResponse {
     string uuid = 1;
     string sender = 2;
     string signature = 3;
-    uint64 block_number = 4;
     string encrypted_tx = 5;
-    uint32 encoding_version = 6;
     google.protobuf.Timestamp created_at = 7;
   }
 }
@@ -1143,10 +1131,9 @@ message GetBackupDepositByUuidResponse {
 
   message Deposit {
     string uuid = 1;
-    string recipient = 2;
-    uint64 block_number = 3;
-    string encrypted_deposit = 4;
-    google.protobuf.Timestamp created_at = 5;
+    string recipient = 3;
+    string encrypted_deposit = 5;
+    google.protobuf.Timestamp created_at = 6;
   }
 }
 
@@ -1191,11 +1178,10 @@ message GetBackupDepositsResponse {
   }
 
   message Deposit {
-    string id = 1;
-    string recipient = 2;
-    uint64 block_number = 3;
-    string encrypted_deposit = 4;
-    google.protobuf.Timestamp created_at = 5;
+    string uuid = 1;
+    string recipient = 3;
+    string encrypted_deposit = 5;
+    google.protobuf.Timestamp created_at = 6;
   }
 
   message Meta {
@@ -1228,9 +1214,9 @@ message GetBackupDepositsListRequest {
   }
 
   message CursorBase {
-    // the number of block
-    // example = "1"
-    string block_number = 10;
+    // the uuid of the backup deposit
+    // example = "1bf0fc62-d119-4059-8c96-499d6c95544e"
+    string uuid = 10;
     // cursor of next/prev sorting value by pagination
     // example = "1"
     string sorting_value = 20;
@@ -1274,21 +1260,20 @@ message GetBackupDepositsListResponse {
   }
 
   message CursorBase {
-    // the number of block
-    // example = "1"
-    string block_number = 10;
+    // the uuid of the backup transaction
+    // example = "1bf0fc62-d119-4059-8c96-499d6c95544e"
+    string uuid = 10;
     // cursor of next/prev sorting value by pagination
     // example = "1"
     string sorting_value = 20;
   }
 
   message Deposit {
-    string id = 1;
-    string deposit_hash = 2;
+    string uuid = 1;
     string recipient = 3;
-    uint64 block_number = 4;
     string encrypted_deposit = 5;
     google.protobuf.Timestamp created_at = 6;
+    string sorting_value = 20;
   }
 }
 

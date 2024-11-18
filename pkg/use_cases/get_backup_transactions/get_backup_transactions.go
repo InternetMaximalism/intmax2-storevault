@@ -65,7 +65,7 @@ func (u *uc) Do(
 
 	for key := range transactions {
 		result.Transactions[key] = &getBackupTransactions.UCGeyBackupTransactionsItem{
-			ID:              transactions[key].ID,
+			Uuid:            transactions[key].ID,
 			Sender:          transactions[key].Sender,
 			Signature:       transactions[key].Signature,
 			BlockNumber:     uint64(transactions[key].BlockNumber),

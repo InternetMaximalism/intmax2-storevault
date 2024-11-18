@@ -1,3 +1,4 @@
+// nolint:dupl
 package store_vault_server
 
 import (
@@ -90,8 +91,7 @@ func (s *StoreVaultServer) GetBackupTransfers(
 
 	for key := range list.Transfers {
 		resp.Data.Transfers[key] = &node.GetBackupTransfersResponse_Transfer{
-			Id:                list.Transfers[key].ID,
-			BlockNumber:       list.Transfers[key].BlockNumber,
+			Uuid:              list.Transfers[key].Uuid,
 			Recipient:         list.Transfers[key].Recipient,
 			EncryptedTransfer: list.Transfers[key].EncryptedTransfer,
 			CreatedAt: &timestamppb.Timestamp{

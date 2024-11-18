@@ -8,7 +8,7 @@ import (
 //go:generate mockgen -destination=../mocks/mock_get_backup_deposits.go -package=mocks -source=get_backup_deposits.go
 
 type UCGetBackupDepositsItem struct {
-	ID               string
+	Uuid             string
 	Recipient        string
 	BlockNumber      uint64
 	EncryptedDeposit string

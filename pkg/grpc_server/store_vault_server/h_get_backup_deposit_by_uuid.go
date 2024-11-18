@@ -1,3 +1,4 @@
+// nolint:dupl
 package store_vault_server
 
 import (
@@ -84,7 +85,6 @@ func (s *StoreVaultServer) GetBackupDepositByUuid(
 		Deposit: &node.GetBackupDepositByUuidResponse_Deposit{
 			Uuid:             info.Uuid,
 			Recipient:        info.Recipient,
-			BlockNumber:      info.BlockNumber,
 			EncryptedDeposit: info.EncryptedDeposit,
 			CreatedAt: &timestamppb.Timestamp{
 				Seconds: info.CreatedAt.Unix(),

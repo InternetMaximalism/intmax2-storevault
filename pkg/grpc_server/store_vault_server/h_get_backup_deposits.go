@@ -1,3 +1,4 @@
+// nolint:dupl
 package store_vault_server
 
 import (
@@ -90,9 +91,8 @@ func (s *StoreVaultServer) GetBackupDeposits(
 
 	for key := range list.Deposits {
 		resp.Data.Deposits[key] = &node.GetBackupDepositsResponse_Deposit{
-			Id:               list.Deposits[key].ID,
+			Uuid:             list.Deposits[key].Uuid,
 			Recipient:        list.Deposits[key].Recipient,
-			BlockNumber:      list.Deposits[key].BlockNumber,
 			EncryptedDeposit: list.Deposits[key].EncryptedDeposit,
 			CreatedAt: &timestamppb.Timestamp{
 				Seconds: list.Deposits[key].CreatedAt.Unix(),

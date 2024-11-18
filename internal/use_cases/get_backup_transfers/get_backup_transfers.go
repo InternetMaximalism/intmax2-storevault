@@ -13,7 +13,7 @@ type UCGetBackupTransfersMeta struct {
 }
 
 type UCGetBackupTransfersTrItem struct {
-	ID                string
+	Uuid              string
 	BlockNumber       uint64
 	Recipient         string
 	EncryptedTransfer string

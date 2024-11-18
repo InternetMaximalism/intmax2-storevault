@@ -10,8 +10,7 @@ import (
 //go:generate mockgen -destination=../mocks/mock_get_backup_transfers_list.go -package=mocks -source=get_backup_transfers_list.go
 
 type UCGetBackupTransfersListCursorBase struct {
-	BlockNumber         string   `json:"block_number"`
-	ConvertBlockNumber  *big.Int `json:"-"`
+	Uuid                string   `json:"uuid"`
 	SortingValue        string   `json:"sorting_value"`
 	ConvertSortingValue *big.Int `json:"-"`
 }
@@ -32,27 +31,28 @@ type UCGetBackupTransfersListInput struct {
 }
 
 type UCGetBackupTransfersListCursorList struct {
-	Prev *UCGetBackupTransfersListCursorBase `json:"prev"`
-	Next *UCGetBackupTransfersListCursorBase `json:"next"`
+	Prev *UCGetBackupTransfersListCursorBase
+	Next *UCGetBackupTransfersListCursorBase
 }
 
 type UCGetBackupTransfersListPaginationOfList struct {
-	PerPage string                              `json:"per_page"`
-	Cursor  *UCGetBackupTransfersListCursorList `json:"cursor"`
+	PerPage string
+	Cursor  *UCGetBackupTransfersListCursorList
 }
 
 type ItemOfGetBackupTransfersList struct {
-	ID                 string    `json:"id"`
-	Recipient          string    `json:"recipient"`
-	TransferDoubleHash string    `json:"transfer_double_hash"`
-	EncryptedTransfer  string    `json:"encrypted_transfer"`
-	BlockNumber        int64     `json:"block_number"`
-	CreatedAt          time.Time `json:"created_at"`
+	Uuid               string
+	Recipient          string
+	TransferDoubleHash string
+	EncryptedTransfer  string
+	BlockNumber        int64
+	CreatedAt          time.Time
+	SortingValue       string
 }
 
 type UCGetBackupTransfersList struct {
-	Pagination UCGetBackupTransfersListPaginationOfList `json:"pagination"`
-	List       []ItemOfGetBackupTransfersList           `json:"list"`
+	Pagination UCGetBackupTransfersListPaginationOfList
+	List       []ItemOfGetBackupTransfersList
 }
 
 // UseCaseGetBackupTransfersList describes GetBackupTransfersList contract.
