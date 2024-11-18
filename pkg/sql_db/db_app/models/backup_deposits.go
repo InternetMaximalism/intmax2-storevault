@@ -7,12 +7,12 @@ import (
 )
 
 type BackupDeposit struct {
-	ID                string    `json:"id"`
-	Recipient         string    `json:"recipient"`
-	DepositDoubleHash string    `json:"deposit_double_hash"`
-	EncryptedDeposit  string    `json:"encrypted_deposit"`
-	BlockNumber       int64     `json:"block_number"`
-	CreatedAt         time.Time `json:"created_at"`
+	ID                string
+	Recipient         string
+	DepositDoubleHash string
+	EncryptedDeposit  string
+	BlockNumber       int64
+	CreatedAt         time.Time
 }
 
 type ListOfBackupDeposit []BackupDeposit
@@ -24,7 +24,7 @@ type PaginationOfListOfBackupDepositsInput struct {
 }
 
 type CursorBaseOfListOfBackupDeposits struct {
-	BN           *big.Int
+	ID           string
 	SortingValue *big.Int
 }
 

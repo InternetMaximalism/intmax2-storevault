@@ -11,6 +11,7 @@ import (
 	"intmax2-store-vault/internal/pb/gateway/http_response_modifier"
 	node "intmax2-store-vault/internal/pb/gen/store_vault_service/node"
 	"intmax2-store-vault/internal/pb/listener"
+	"intmax2-store-vault/internal/verify_deposit_confirmation_service"
 	server "intmax2-store-vault/pkg/grpc_server/store_vault_server"
 	"intmax2-store-vault/third_party"
 	"sync"
@@ -42,7 +43,26 @@ func NewServerCmd(s *StoreVaultServer) *cobra.Command {
 		Use:   use,
 		Short: short,
 		Run: func(cmd *cobra.Command, args []string) {
-			if err := s.Init(); err != nil {
+			err := s.SB.SetupEthereumNetworkChainID(s.Context)
+			if err != nil {
+				const msg = "failed to setup ethereum network chain ID: %+v"
+				s.Log.Fatalf(msg, err.Error())
+			}
+
+			err = s.SB.SetupScrollNetworkChainID(s.Context)
+			if err != nil {
+				const msg = "failed to setup scroll network chain ID: %+v"
+				s.Log.Fatalf(msg, err.Error())
+			}
+
+			var vdcs verify_deposit_confirmation_service.VerifyDepositConfirmationService
+			vdcs, err = verify_deposit_confirmation_service.New(s.Context, s.Config, s.Log, s.SB)
+			if err != nil {
+				const msg = "the verify-deposit-confirmation service init: %+v"
+				s.Log.Fatalf(msg, err.Error())
+			}
+
+			if err = s.Init(vdcs); err != nil {
 				const msg = "failed to start api: %+v"
 				s.Log.Fatalf(msg, err.Error())
 			}
@@ -51,7 +71,9 @@ func NewServerCmd(s *StoreVaultServer) *cobra.Command {
 }
 
 // TODO: Common parts should be shared between the server side and the client side.
-func (s *StoreVaultServer) Init() error {
+func (s *StoreVaultServer) Init(
+	vdcs VerifyDepositConfirmationService,
+) error {
 	tm := time.Duration(s.Config.HTTP.Timeout) * time.Second
 
 	var c *cors.Cors
@@ -70,7 +92,7 @@ func (s *StoreVaultServer) Init() error {
 	}
 
 	srv := server.New(
-		s.Log, s.Config, s.DbApp, server.NewCommands(), s.SB, s.Config.HTTP.CookieForAuthUse, s.HC,
+		s.Log, s.Config, s.DbApp, server.NewCommands(), s.SB, s.Config.HTTP.CookieForAuthUse, s.HC, vdcs,
 	)
 	ctx := context.WithValue(s.Context, consts.AppConfigs, s.Config)
 

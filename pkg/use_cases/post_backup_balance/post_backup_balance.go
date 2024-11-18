@@ -2,20 +2,13 @@ package post_backup_balance
 
 import (
 	"context"
-	"encoding/binary"
-	"fmt"
+	"errors"
 	"intmax2-store-vault/configs"
 	"intmax2-store-vault/internal/logger"
 	"intmax2-store-vault/internal/open_telemetry"
-	node "intmax2-store-vault/internal/pb/gen/store_vault_service/node"
-	service "intmax2-store-vault/internal/store_vault_service"
-	intMaxTypes "intmax2-store-vault/internal/types"
-	backupBalance "intmax2-store-vault/internal/use_cases/backup_balance"
-
-	"io"
+	postBackupBalance "intmax2-store-vault/internal/use_cases/post_backup_balance"
 
 	"go.opentelemetry.io/otel/attribute"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // uc describes use case
@@ -25,7 +18,7 @@ type uc struct {
 	db  SQLDriverApp
 }
 
-func New(cfg *configs.Config, log logger.Logger, db SQLDriverApp) backupBalance.UseCasePostBackupBalance {
+func New(cfg *configs.Config, log logger.Logger, db SQLDriverApp) postBackupBalance.UseCasePostBackupBalance {
 	return &uc{
 		cfg: cfg,
 		log: log,
@@ -34,8 +27,8 @@ func New(cfg *configs.Config, log logger.Logger, db SQLDriverApp) backupBalance.
 }
 
 func (u *uc) Do(
-	ctx context.Context, input *backupBalance.UCPostBackupBalanceInput,
-) (*node.BackupBalanceResponse_Data_Balance, error) {
+	ctx context.Context, input *postBackupBalance.UCPostBackupBalanceInput,
+) (*postBackupBalance.UCPostBackupBalance, error) {
 	const (
 		hName                    = "UseCase PostBackupBalance"
 		userKey                  = "user"
@@ -56,23 +49,31 @@ func (u *uc) Do(
 	}
 
 	span.SetAttributes(
-		// attribute.String(userKey, input.DecodeUser.ToAddress().String()),
-		// attribute.Int64(blockNumberKey, int64(input.BlockNumber)),
-		// attribute.String(encryptedBalanceProofKey, input.EncryptedBalanceProof.Proof),
-		// attribute.String(encryptedBalanceProofKey, input.EncryptedBalanceProof.EncryptedPublicInputs),
+		attribute.String(userKey, input.User),
+		attribute.String(encryptedBalanceProofKey, input.EncryptedBalanceProof),
 		attribute.String(encryptedBalanceDataKey, input.EncryptedBalanceData),
 		attribute.StringSlice(encryptedTxsKey, input.EncryptedTxs),
 		attribute.StringSlice(encryptedTransfersKey, input.EncryptedTransfers),
 		attribute.StringSlice(encryptedDepositsKey, input.EncryptedDeposits),
+		attribute.Int64(blockNumberKey, int64(input.BlockNumber)),
 	)
 
-	newBackupBalance, err := service.PostBackupBalance(ctx, u.cfg, u.log, u.db, input)
+	newBackupBalance, err := u.db.CreateBackupBalance(
+		input.User,
+		input.EncryptedBalanceProof,
+		input.EncryptedBalanceData,
+		input.Signature,
+		input.EncryptedTxs,
+		input.EncryptedTransfers,
+		input.EncryptedDeposits,
+		int64(input.BlockNumber),
+	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to post backup balance: %w", err)
+		return nil, errors.Join(ErrCreateBackupBalanceFail, err)
 	}
 
-	return &node.BackupBalanceResponse_Data_Balance{
-		Id:                    newBackupBalance.ID,
+	return &postBackupBalance.UCPostBackupBalance{
+		ID:                    newBackupBalance.ID,
 		UserAddress:           newBackupBalance.UserAddress,
 		EncryptedBalanceProof: newBackupBalance.EncryptedBalanceProof,
 		EncryptedBalanceData:  newBackupBalance.EncryptedBalanceData,
@@ -81,40 +82,6 @@ func (u *uc) Do(
 		EncryptedDeposits:     newBackupBalance.EncryptedDeposits,
 		BlockNumber:           newBackupBalance.BlockNumber,
 		Signature:             newBackupBalance.Signature,
-		CreatedAt: &timestamppb.Timestamp{
-			Seconds: newBackupBalance.CreatedAt.Unix(),
-			Nanos:   int32(newBackupBalance.CreatedAt.Nanosecond()),
-		},
+		CreatedAt:             newBackupBalance.CreatedAt,
 	}, nil
-}
-
-func WriteBalance(buf io.Writer, balance *intMaxTypes.Balance) error {
-	err := binary.Write(buf, binary.LittleEndian, balance.TokenIndex)
-	if err != nil {
-		return err
-	}
-	const numAmountBytes = 32
-	balanceBytes := make([]byte, numAmountBytes)
-	b := balance.Amount.Bytes()
-	copy(balanceBytes[32-len(b):], b)
-
-	err = binary.Write(buf, binary.LittleEndian, balanceBytes)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func WriteBalances(buf io.Writer, balances []*intMaxTypes.Balance) error {
-	if err := binary.Write(buf, binary.LittleEndian, int64(len(balances))); err != nil {
-		return err
-	}
-
-	for _, balance := range balances {
-		if err := WriteBalance(buf, balance); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }

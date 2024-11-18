@@ -7,8 +7,10 @@ import (
 	"intmax2-store-vault/configs"
 	"intmax2-store-vault/internal/logger"
 	"intmax2-store-vault/internal/open_telemetry"
+	mFL "intmax2-store-vault/internal/sql_filter/models"
 	getBackupTransactionsList "intmax2-store-vault/internal/use_cases/get_backup_transactions_list"
 	mDBApp "intmax2-store-vault/pkg/sql_db/db_app/models"
+	"math/big"
 	"strconv"
 
 	"go.opentelemetry.io/otel/attribute"
@@ -62,7 +64,7 @@ func (u *uc) Do(
 		pagination.Offset = input.Pagination.Offset
 		if input.Pagination.Cursor != nil {
 			pagination.Cursor = &mDBApp.CursorBaseOfListOfBackupTransactions{
-				BN:           input.Pagination.Cursor.ConvertBlockNumber,
+				ID:           input.Pagination.Cursor.Uuid,
 				SortingValue: input.Pagination.Cursor.ConvertSortingValue,
 			}
 		}
@@ -98,13 +100,13 @@ func (u *uc) Do(
 		resp.Pagination.Cursor = &getBackupTransactionsList.UCGetBackupTransactionsListCursorList{}
 		if paginator.Cursor.Prev != nil {
 			resp.Pagination.Cursor.Prev = &getBackupTransactionsList.UCGetBackupTransactionsListCursorBase{
-				BlockNumber:  paginator.Cursor.Prev.BN.String(),
+				Uuid:         paginator.Cursor.Prev.ID,
 				SortingValue: paginator.Cursor.Prev.SortingValue.String(),
 			}
 		}
 		if paginator.Cursor.Next != nil {
 			resp.Pagination.Cursor.Next = &getBackupTransactionsList.UCGetBackupTransactionsListCursorBase{
-				BlockNumber:  paginator.Cursor.Next.BN.String(),
+				Uuid:         paginator.Cursor.Next.ID,
 				SortingValue: paginator.Cursor.Next.SortingValue.String(),
 			}
 		}
@@ -112,13 +114,17 @@ func (u *uc) Do(
 
 	for key := range listDBApp {
 		resp.List[key] = getBackupTransactionsList.ItemOfGetBackupTransactionsList{
-			ID:           listDBApp[key].ID,
-			Sender:       listDBApp[key].Sender,
-			TxDoubleHash: listDBApp[key].TxDoubleHash,
-			EncryptedTx:  listDBApp[key].EncryptedTx,
-			BlockNumber:  listDBApp[key].BlockNumber,
-			Signature:    listDBApp[key].Signature,
-			CreatedAt:    listDBApp[key].CreatedAt,
+			Uuid:        listDBApp[key].ID,
+			Sender:      listDBApp[key].Sender,
+			EncryptedTx: listDBApp[key].EncryptedTx,
+			Signature:   listDBApp[key].Signature,
+			CreatedAt:   listDBApp[key].CreatedAt,
+		}
+		switch input.OrderBy {
+		case mFL.DateCreate:
+			resp.List[key].SortingValue = new(big.Int).SetInt64(listDBApp[key].CreatedAt.UTC().UnixNano()).String()
+		default:
+			resp.List[key].SortingValue = new(big.Int).SetInt64(listDBApp[key].CreatedAt.UTC().UnixNano()).String()
 		}
 	}
 

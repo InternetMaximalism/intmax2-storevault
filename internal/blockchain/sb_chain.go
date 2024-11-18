@@ -1,12 +1,14 @@
 package blockchain
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"fmt"
 	errorsB "intmax2-store-vault/internal/blockchain/errors"
 	"intmax2-store-vault/internal/open_telemetry"
 	"math/big"
+	"os"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -50,6 +52,39 @@ func (sb *serviceBlockchain) scrollNetworkChainIDValidator() error {
 	)
 }
 
+func (sb *serviceBlockchain) SetupScrollNetworkChainID(ctx context.Context) error {
+	const (
+		hName = "ServiceBlockchain func:SetupScrollNetworkChainID"
+	)
+
+	spanCtx, span := open_telemetry.Tracer().Start(ctx, hName)
+	defer span.End()
+
+	err := sb.scrollNetworkChainIDValidator()
+	if err != nil {
+		const (
+			enterMSG = "Enter the Scroll network chain-ID:"
+			crlf     = '\n'
+		)
+		fmt.Printf(enterMSG)
+		var chainID string
+		chainID, err = bufio.NewReader(os.Stdin).ReadString(crlf)
+		if err != nil {
+			open_telemetry.MarkSpanError(spanCtx, err)
+			return errors.Join(errorsB.ErrStdinProcessingFail, err)
+		}
+		sb.cfg.Blockchain.ScrollNetworkChainID = strings.TrimSpace(chainID)
+	}
+
+	err = sb.scrollNetworkChainIDValidator()
+	if err != nil {
+		open_telemetry.MarkSpanError(spanCtx, err)
+		return errors.Join(ErrScrollChainIDInvalid, err)
+	}
+
+	return nil
+}
+
 func (sb *serviceBlockchain) ScrollNetworkChainLinkEvmJSONRPC(ctx context.Context) (string, error) {
 	const (
 		hName                   = "ServiceBlockchain func:ScrollNetworkChainLinkEvmJSONRPC"
@@ -83,6 +118,58 @@ func (sb *serviceBlockchain) ethereumNetworkChainIDValidator() error {
 			string(EthereumMainNetChainID), string(EthereumSepoliaChainID),
 		),
 	)
+}
+
+func (sb *serviceBlockchain) SetupEthereumNetworkChainID(ctx context.Context) error {
+	const (
+		hName    = "ServiceBlockchain func:SetupEthereumNetworkChainID"
+		emptyKey = ""
+	)
+
+	spanCtx, span := open_telemetry.Tracer().Start(ctx, hName)
+	defer span.End()
+
+	sb.cfg.Blockchain.EthereumNetworkRpcUrl = strings.TrimSpace(sb.cfg.Blockchain.EthereumNetworkRpcUrl)
+	if sb.cfg.Blockchain.EthereumNetworkRpcUrl != emptyKey {
+		client, err := ethclient.DialContext(spanCtx, sb.cfg.Blockchain.EthereumNetworkRpcUrl)
+		if err != nil {
+			open_telemetry.MarkSpanError(spanCtx, err)
+			return errors.Join(errorsB.ErrEthClientDialFail)
+		}
+
+		var chainID *big.Int
+		chainID, err = client.ChainID(spanCtx)
+		if err != nil {
+			open_telemetry.MarkSpanError(spanCtx, err)
+			return errors.Join(errorsB.ErrChainIDWithEthClientFail)
+		}
+
+		sb.cfg.Blockchain.EthereumNetworkChainID = chainID.String()
+	}
+
+	err := sb.ethereumNetworkChainIDValidator()
+	if err != nil {
+		const (
+			enterMSG = "Enter the Ethereum network chain-ID:"
+			crlf     = '\n'
+		)
+		fmt.Printf(enterMSG)
+		var chainID string
+		chainID, err = bufio.NewReader(os.Stdin).ReadString(crlf)
+		if err != nil {
+			open_telemetry.MarkSpanError(spanCtx, err)
+			return errors.Join(errorsB.ErrStdinProcessingFail, err)
+		}
+		sb.cfg.Blockchain.EthereumNetworkChainID = strings.TrimSpace(chainID)
+	}
+
+	err = sb.ethereumNetworkChainIDValidator()
+	if err != nil {
+		open_telemetry.MarkSpanError(spanCtx, err)
+		return errors.Join(ErrEthereumChainIDInvalid, err)
+	}
+
+	return nil
 }
 
 func (sb *serviceBlockchain) EthereumNetworkChainLinkEvmJSONRPC(ctx context.Context) (string, error) {

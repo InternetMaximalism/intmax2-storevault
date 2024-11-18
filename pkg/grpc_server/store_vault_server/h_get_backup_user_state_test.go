@@ -36,6 +36,7 @@ func TestGetBackupUserState(t *testing.T) {
 	dbApp := NewMockSQLDriverApp(ctrl)
 	hc := health.NewHandler()
 	sb := NewMockServiceBlockchain(ctrl)
+	vdcs := NewMockVerifyDepositConfirmationService(ctrl)
 
 	const (
 		emptyKey = ""
@@ -56,7 +57,7 @@ func TestGetBackupUserState(t *testing.T) {
 
 	cmd := NewMockCommands(ctrl)
 
-	grpcServerStop, gwServer := Start(cmd, ctx, cfg, log, dbApp, &hc, sb)
+	grpcServerStop, gwServer := Start(cmd, ctx, cfg, log, dbApp, &hc, sb, vdcs)
 	defer grpcServerStop()
 
 	cases := []struct {

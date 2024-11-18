@@ -2,10 +2,28 @@ package get_backup_deposits
 
 import (
 	"context"
-	node "intmax2-store-vault/internal/pb/gen/store_vault_service/node"
+	"time"
 )
 
 //go:generate mockgen -destination=../mocks/mock_get_backup_deposits.go -package=mocks -source=get_backup_deposits.go
+
+type UCGetBackupDepositsItem struct {
+	Uuid             string
+	Recipient        string
+	BlockNumber      uint64
+	EncryptedDeposit string
+	CreatedAt        time.Time
+}
+
+type UCGetBackupDepositsMeta struct {
+	StartBlockNumber uint64
+	EndBlockNumber   uint64
+}
+
+type UCGetBackupDeposits struct {
+	Deposits []*UCGetBackupDepositsItem
+	Meta     *UCGetBackupDepositsMeta
+}
 
 type UCGetBackupDepositsInput struct {
 	Sender           string `json:"sender"`
@@ -15,5 +33,5 @@ type UCGetBackupDepositsInput struct {
 
 // UseCaseGetBackupDeposits describes GetBackupDeposits contract.
 type UseCaseGetBackupDeposits interface {
-	Do(ctx context.Context, input *UCGetBackupDepositsInput) (*node.GetBackupDepositsResponse_Data, error)
+	Do(ctx context.Context, input *UCGetBackupDepositsInput) (*UCGetBackupDeposits, error)
 }

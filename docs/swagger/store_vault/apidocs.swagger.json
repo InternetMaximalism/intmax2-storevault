@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "INTMAX2 Store Vault",
+    "title": "INTMAX2 Data Store Vault",
     "description": "### Definitions\nThe INTMAX2 Store Vault service.\n",
     "version": "SWAGGER_VERSION"
   },
@@ -201,16 +201,16 @@
         ]
       }
     },
-    "/v1/backups/deposit/{depositHash}": {
+    "/v1/backups/deposit/{uuid}": {
       "get": {
-        "summary": "GetBackupTransactionByHash processes a request for backup transaction by hash",
-        "description": "## This method handles the backup transaction by hash.",
-        "operationId": "StoreVaultService_GetBackupDepositByHash",
+        "summary": "GetBackupTransactionByUuid processes a request for backup transaction by uuid",
+        "description": "## GetBackupTransactionByUuid processes a request for backup transaction by uuid.",
+        "operationId": "StoreVaultService_GetBackupDepositByUuid",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1GetBackupDepositByHashResponse"
+              "$ref": "#/definitions/v1GetBackupDepositByUuidResponse"
             }
           },
           "400": {
@@ -228,15 +228,9 @@
         },
         "parameters": [
           {
-            "name": "depositHash",
+            "name": "uuid",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "recipient",
-            "in": "query",
-            "required": false,
             "type": "string"
           }
         ],
@@ -248,7 +242,7 @@
     "/v1/backups/deposits/list": {
       "post": {
         "summary": "GetBackupDepositsList processes a request for backup deposits list with pagination and filters",
-        "description": "## This method handles the backup deposits list with pagination and filters.\n\nOption for `orderBy` (default=`date_create`)\n\nOption for `sorting`: `asc`, `desc` (default=`desc`)\n\n** **\n\nIn body request need pass array of filters.\n\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Filter must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"relation\":   \"string\",\n     \"dataField\": \"string\",\n     \"condition\":  \"string\",\n     \"value\":      \"string\"\n   }\n   ```\n\u003c/details\u003e\n\nOption for `relation`: `and`, `or`\n\nOption for `dataField`:\n * `block_number`\n\nOption condition by `dataField`:\n * `block_number`: `lessThan`, `lessThanOrEqualTo`, `is`, `greaterThanOrEqualTo`, `greaterThan`.\n\nFilter `block_number`: `lessThan`, `lessThanOrEqualTo`, `is`, `greaterThanOrEqualTo`, `greaterThan`:\n * for filtering need set the value `value` with specified block number\n example: `value` = `1` (`is`).\n\n** **\n\nIn body request need pass pagination\n\n`perPage` number of items to list per page (min = 0, max=100, default = 100 (if equal 0))\n\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"direction\": \"string\",\n     \"perPage\": \"string\",\n     \"cursor\": {\n       \"blockNumber\": \"string\",\n       \"sortingValue\": \"string\"\n     }\n   }\n   ```\n\u003c/details\u003e\n\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"perPage\": \"string\",\n     \"cursor\": {\n       \"prev\": {\n         \"blockNumber\": \"string\",\n         \"sortingValue\": \"string\"\n       },\n       \"next\": {\n         \"blockNumber\": \"string\",\n         \"sortingValue\": \"string\"\n       }\n     }\n   }\n   ```\n\u003c/details\u003e\n\nFirst request with empty pagination with request and empty list of items\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"perPage\": \"100\",\n     \"cursor\": null\n   }\n   ```\n\u003c/details\u003e\n\nA request with non-empty `pagination` made from a response with a non-empty list of elements and pagination (`sorting` is `asc`)\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response and next request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   Pagination from response\n   {\n     \"perPage\": \"100\",\n     \"cursor\": {\n       \"prev\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"1\"\n       },\n       \"next\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"100\"\n       }\n     }\n   }\n   Pagination for request from response with next values\n   {\n     \"perPage\": \"100\",\n     \"direction\": \"next\",\n     \"cursor\": {\n       \"blockNumber\": \"1\",\n       \"sorting_value\": \"100\"\n     }\n   }\n   ```\n\u003c/details\u003e\n\nA request with non-empty `pagination` made from a response with a non-empty list of elements and pagination (`sorting` is `desc`)\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response and next request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   Pagination from response\n   {\n     \"perPage\": \"10\",\n     \"cursor\": {\n       \"prev\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"10\"\n       },\n       \"next\": {\n         \"blockNumber\": \"1\",\n         \"sorting_value\": \"1\"\n       }\n     }\n   }\n   Pagination for request from response with next values\n   {\n     \"perPage\": \"10\",\n     \"direction\": \"next\",\n     \"cursor\": {\n       \"blockNumber\": \"1\",\n       \"sortingValue\": \"1\"\n     }\n   }\n   ```\n\u003c/details\u003e\n\nA request with non-empty pagination made from a response with a non-empty list of items and pagination for the situation when the end of the items list is reached.\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response and next request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   Pagination from response\n   {\n     \"perPage\": \"10\",\n     \"cursor\": {\n       \"prev\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"10\"\n       },\n       \"next\": {\n         \"blockNumber\": \"1\",\n         \"sorting_value\": \"1\"\n       }\n     }\n   }\n   Pagination for request from response with next values\n   {\n     \"perPage\": \"10\",\n     \"direction\": \"next\",\n     \"cursor\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"1\"\n     }\n   }\n   Pagination from response\n   {\n     \"perPage\": \"10\",\n     \"cursor\": {\n       \"prev\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"1\"\n       },\n       \"next\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"1\"\n       }\n     }\n   }\n   ```\n\u003c/details\u003e",
+        "description": "## This method handles the backup deposits list with pagination and filters.\n\nOption for `orderBy` (default=`date_create`)\n\nOption for `sorting`: `asc`, `desc` (default=`desc`)\n\n** **\n\nIn body request need pass array of filters.\n\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Filter must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"relation\":   \"string\",\n     \"dataField\": \"string\",\n     \"condition\":  \"string\",\n     \"value\":      \"string\"\n   }\n   ```\n\u003c/details\u003e\n\nOption for `relation`: `and`, `or`\n\nOption for `dataField`:\n * `backup_start_time`\n\nOption condition by `dataField`:\n * `backup_start_time`: `lessThan`, `lessThanOrEqualTo`, `greaterThanOrEqualTo`, `greaterThan`.\n\nFilter `backup_start_time`: `lessThan`, `lessThanOrEqualTo`, `greaterThanOrEqualTo`, `greaterThan`:\n * for filtering need set the value `value` with specified the backup start time\n example: `value` = `2024-06-10T22:00:00.123Z` (`lessThanOrEqualTo`).\n\n** **\n\nIn body request need pass pagination\n\n`perPage` number of items to list per page (min = 0, max=100, default = 100 (if equal 0))\n\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"direction\": \"string\",\n     \"perPage\": \"string\",\n     \"cursor\": {\n       \"uuid\": \"string\",\n       \"sortingValue\": \"string\"\n     }\n   }\n   ```\n\u003c/details\u003e\n\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"perPage\": \"string\",\n     \"cursor\": {\n       \"prev\": {\n         \"uuid\": \"string\",\n         \"sortingValue\": \"string\"\n       },\n       \"next\": {\n         \"uuid\": \"string\",\n         \"sortingValue\": \"string\"\n       }\n     }\n   }\n   ```\n\u003c/details\u003e\n\nFirst request with empty pagination with request and empty list of items\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"perPage\": \"100\",\n     \"cursor\": null\n   }\n   ```\n\u003c/details\u003e\n\nA request with non-empty `pagination` made from a response with a non-empty list of elements and pagination (`sorting` is `asc`)\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response and next request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   Pagination from response\n   {\n     \"perPage\": \"100\",\n     \"cursor\": {\n       \"prev\": {\n         \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n         \"sortingValue\": \"1\"\n       },\n       \"next\": {\n         \"uuid\": \"25a5cb38-9374-47bb-8efb-74d7c3202dad\",\n         \"sortingValue\": \"100\"\n       }\n     }\n   }\n   Pagination for request from response with next values\n   {\n     \"perPage\": \"100\",\n     \"direction\": \"next\",\n     \"cursor\": {\n       \"uuid\": \"25a5cb38-9374-47bb-8efb-74d7c3202dad\",\n       \"sorting_value\": \"100\"\n     }\n   }\n   ```\n\u003c/details\u003e\n\nA request with non-empty `pagination` made from a response with a non-empty list of elements and pagination (`sorting` is `desc`)\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response and next request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   Pagination from response\n   {\n     \"perPage\": \"10\",\n     \"cursor\": {\n       \"prev\": {\n         \"uuid\": \"5d31d229-3c1a-43d7-a5ae-eeca1c60f5f1\",\n         \"sortingValue\": \"10\"\n       },\n       \"next\": {\n         \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n         \"sorting_value\": \"1\"\n       }\n     }\n   }\n   Pagination for request from response with next values\n   {\n     \"perPage\": \"10\",\n     \"direction\": \"next\",\n     \"cursor\": {\n       \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n       \"sortingValue\": \"1\"\n     }\n   }\n   ```\n\u003c/details\u003e\n\nA request with non-empty pagination made from a response with a non-empty list of items and pagination for the situation when the end of the items list is reached.\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response and next request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   Pagination from response\n   {\n     \"perPage\": \"10\",\n     \"cursor\": {\n       \"prev\": {\n         \"uuid\": \"5d31d229-3c1a-43d7-a5ae-eeca1c60f5f1\",\n         \"sortingValue\": \"10\"\n       },\n       \"next\": {\n         \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n         \"sorting_value\": \"1\"\n       }\n     }\n   }\n   Pagination for request from response with next values\n   {\n     \"perPage\": \"10\",\n     \"direction\": \"next\",\n     \"cursor\": {\n         \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n         \"sortingValue\": \"1\"\n     }\n   }\n   Pagination from response\n   {\n     \"perPage\": \"10\",\n     \"cursor\": {\n       \"prev\": {\n         \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n         \"sortingValue\": \"1\"\n       },\n       \"next\": {\n         \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n         \"sortingValue\": \"1\"\n       }\n     }\n   }\n   ```\n\u003c/details\u003e",
         "operationId": "StoreVaultService_GetBackupDepositsList",
         "responses": {
           "200": {
@@ -418,16 +412,16 @@
         ]
       }
     },
-    "/v1/backups/transaction/{txHash}": {
+    "/v1/backups/transaction/{uuid}": {
       "get": {
-        "summary": "GetBackupTransactionByHash processes a request for backup transaction by hash",
-        "description": "## This method handles the backup transaction by hash.",
-        "operationId": "StoreVaultService_GetBackupTransactionByHash",
+        "summary": "GetBackupTransactionByUuid processes a request for backup transaction by uuid",
+        "description": "## GetBackupTransactionByUuid processes a request for backup transaction by uuid.",
+        "operationId": "StoreVaultService_GetBackupTransactionByUuid",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1GetBackupTransactionByHashResponse"
+              "$ref": "#/definitions/v1GetBackupTransactionByUuidResponse"
             }
           },
           "400": {
@@ -445,15 +439,9 @@
         },
         "parameters": [
           {
-            "name": "txHash",
+            "name": "uuid",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "sender",
-            "in": "query",
-            "required": false,
             "type": "string"
           }
         ],
@@ -465,7 +453,7 @@
     "/v1/backups/transactions/list": {
       "post": {
         "summary": "GetBackupTransactionsList processes a request for backup transactions list with pagination and filters",
-        "description": "## This method handles the backup transactions list with pagination and filters.\n\nOption for `orderBy` (default=`date_create`)\n\nOption for `sorting`: `asc`, `desc` (default=`desc`)\n\n** **\n\nIn body request need pass array of filters.\n\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Filter must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"relation\":   \"string\",\n     \"dataField\": \"string\",\n     \"condition\":  \"string\",\n     \"value\":      \"string\"\n   }\n   ```\n\u003c/details\u003e\n\nOption for `relation`: `and`, `or`\n\nOption for `dataField`:\n * `block_number`\n\nOption condition by `dataField`:\n * `block_number`: `lessThan`, `lessThanOrEqualTo`, `is`, `greaterThanOrEqualTo`, `greaterThan`.\n\nFilter `block_number`: `lessThan`, `lessThanOrEqualTo`, `is`, `greaterThanOrEqualTo`, `greaterThan`:\n * for filtering need set the value `value` with specified block number\n example: `value` = `1` (`is`).\n\n** **\n\nIn body request need pass pagination\n\n`perPage` number of items to list per page (min = 0, max=100, default = 100 (if equal 0))\n\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"direction\": \"string\",\n     \"perPage\": \"string\",\n     \"cursor\": {\n       \"blockNumber\": \"string\",\n       \"sortingValue\": \"string\"\n     }\n   }\n   ```\n\u003c/details\u003e\n\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"perPage\": \"string\",\n     \"cursor\": {\n       \"prev\": {\n         \"blockNumber\": \"string\",\n         \"sortingValue\": \"string\"\n       },\n       \"next\": {\n         \"blockNumber\": \"string\",\n         \"sortingValue\": \"string\"\n       }\n     }\n   }\n   ```\n\u003c/details\u003e\n\nFirst request with empty pagination with request and empty list of items\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"perPage\": \"100\",\n     \"cursor\": null\n   }\n   ```\n\u003c/details\u003e\n\nA request with non-empty `pagination` made from a response with a non-empty list of elements and pagination (`sorting` is `asc`)\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response and next request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   Pagination from response\n   {\n     \"perPage\": \"100\",\n     \"cursor\": {\n       \"prev\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"1\"\n       },\n       \"next\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"100\"\n       }\n     }\n   }\n   Pagination for request from response with next values\n   {\n     \"perPage\": \"100\",\n     \"direction\": \"next\",\n     \"cursor\": {\n       \"blockNumber\": \"1\",\n       \"sorting_value\": \"100\"\n     }\n   }\n   ```\n\u003c/details\u003e\n\nA request with non-empty `pagination` made from a response with a non-empty list of elements and pagination (`sorting` is `desc`)\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response and next request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   Pagination from response\n   {\n     \"perPage\": \"10\",\n     \"cursor\": {\n       \"prev\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"10\"\n       },\n       \"next\": {\n         \"blockNumber\": \"1\",\n         \"sorting_value\": \"1\"\n       }\n     }\n   }\n   Pagination for request from response with next values\n   {\n     \"perPage\": \"10\",\n     \"direction\": \"next\",\n     \"cursor\": {\n       \"blockNumber\": \"1\",\n       \"sortingValue\": \"1\"\n     }\n   }\n   ```\n\u003c/details\u003e\n\nA request with non-empty pagination made from a response with a non-empty list of items and pagination for the situation when the end of the items list is reached.\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response and next request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   Pagination from response\n   {\n     \"perPage\": \"10\",\n     \"cursor\": {\n       \"prev\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"10\"\n       },\n       \"next\": {\n         \"blockNumber\": \"1\",\n         \"sorting_value\": \"1\"\n       }\n     }\n   }\n   Pagination for request from response with next values\n   {\n     \"perPage\": \"10\",\n     \"direction\": \"next\",\n     \"cursor\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"1\"\n     }\n   }\n   Pagination from response\n   {\n     \"perPage\": \"10\",\n     \"cursor\": {\n       \"prev\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"1\"\n       },\n       \"next\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"1\"\n       }\n     }\n   }\n   ```\n\u003c/details\u003e",
+        "description": "## This method handles the backup transactions list with pagination and filters.\n\nOption for `orderBy` (default=`date_create`)\n\nOption for `sorting`: `asc`, `desc` (default=`desc`)\n\n** **\n\nIn body request need pass array of filters.\n\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Filter must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"relation\":   \"string\",\n     \"dataField\": \"string\",\n     \"condition\":  \"string\",\n     \"value\":      \"string\"\n   }\n   ```\n\u003c/details\u003e\n\nOption for `relation`: `and`, `or`\n\nOption for `dataField`:\n * `backup_start_time`\n\nOption condition by `dataField`:\n * `backup_start_time`: `lessThan`, `lessThanOrEqualTo`, `greaterThanOrEqualTo`, `greaterThan`.\n\nFilter `backup_start_time`: `lessThan`, `lessThanOrEqualTo`, `greaterThanOrEqualTo`, `greaterThan`:\n * for filtering need set the value `value` with specified the backup start time\n example: `value` = `2024-06-10T22:00:00.123Z` (`lessThanOrEqualTo`).\n\n** **\n\nIn body request need pass pagination\n\n`perPage` number of items to list per page (min = 0, max=100, default = 100 (if equal 0))\n\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"direction\": \"string\",\n     \"perPage\": \"string\",\n     \"cursor\": {\n       \"uuid\": \"string\",\n       \"sortingValue\": \"string\"\n     }\n   }\n   ```\n\u003c/details\u003e\n\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"perPage\": \"string\",\n     \"cursor\": {\n       \"prev\": {\n         \"uuid\": \"string\",\n         \"sortingValue\": \"string\"\n       },\n       \"next\": {\n         \"uuid\": \"string\",\n         \"sortingValue\": \"string\"\n       }\n     }\n   }\n   ```\n\u003c/details\u003e\n\nFirst request with empty pagination with request and empty list of items\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"perPage\": \"100\",\n     \"cursor\": null\n   }\n   ```\n\u003c/details\u003e\n\nA request with non-empty `pagination` made from a response with a non-empty list of elements and pagination (`sorting` is `asc`)\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response and next request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   Pagination from response\n   {\n     \"perPage\": \"100\",\n     \"cursor\": {\n       \"prev\": {\n         \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n         \"sortingValue\": \"1\"\n       },\n       \"next\": {\n         \"uuid\": \"25a5cb38-9374-47bb-8efb-74d7c3202dad\",\n         \"sortingValue\": \"100\"\n       }\n     }\n   }\n   Pagination for request from response with next values\n   {\n     \"perPage\": \"100\",\n     \"direction\": \"next\",\n     \"cursor\": {\n       \"uuid\": \"25a5cb38-9374-47bb-8efb-74d7c3202dad\",\n       \"sorting_value\": \"100\"\n     }\n   }\n   ```\n\u003c/details\u003e\n\nA request with non-empty `pagination` made from a response with a non-empty list of elements and pagination (`sorting` is `desc`)\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response and next request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   Pagination from response\n   {\n     \"perPage\": \"10\",\n     \"cursor\": {\n       \"prev\": {\n         \"uuid\": \"5d31d229-3c1a-43d7-a5ae-eeca1c60f5f1\",\n         \"sortingValue\": \"10\"\n       },\n       \"next\": {\n         \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n         \"sorting_value\": \"1\"\n       }\n     }\n   }\n   Pagination for request from response with next values\n   {\n     \"perPage\": \"10\",\n     \"direction\": \"next\",\n     \"cursor\": {\n       \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n       \"sortingValue\": \"1\"\n     }\n   }\n   ```\n\u003c/details\u003e\n\nA request with non-empty pagination made from a response with a non-empty list of items and pagination for the situation when the end of the items list is reached.\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response and next request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   Pagination from response\n   {\n     \"perPage\": \"10\",\n     \"cursor\": {\n       \"prev\": {\n         \"uuid\": \"5d31d229-3c1a-43d7-a5ae-eeca1c60f5f1\",\n         \"sortingValue\": \"10\"\n       },\n       \"next\": {\n         \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n         \"sorting_value\": \"1\"\n       }\n     }\n   }\n   Pagination for request from response with next values\n   {\n     \"perPage\": \"10\",\n     \"direction\": \"next\",\n     \"cursor\": {\n         \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n         \"sortingValue\": \"1\"\n     }\n   }\n   Pagination from response\n   {\n     \"perPage\": \"10\",\n     \"cursor\": {\n       \"prev\": {\n         \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n         \"sortingValue\": \"1\"\n       },\n       \"next\": {\n         \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n         \"sortingValue\": \"1\"\n       }\n     }\n   }\n   ```\n\u003c/details\u003e",
         "operationId": "StoreVaultService_GetBackupTransactionsList",
         "responses": {
           "200": {
@@ -591,16 +579,16 @@
         ]
       }
     },
-    "/v1/backups/transfer/{transferHash}": {
+    "/v1/backups/transfer/{uuid}": {
       "get": {
-        "summary": "GetBackupTransferByHash processes a request for backup transfer by hash",
-        "description": "## This method handles the backup transfer by hash.",
-        "operationId": "StoreVaultService_GetBackupTransferByHash",
+        "summary": "GetBackupTransferByUuid processes a request for backup transfer by uuid",
+        "description": "## GetBackupTransferByUuid processes a request for backup transfer by uuid.",
+        "operationId": "StoreVaultService_GetBackupTransferByUuid",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1GetBackupTransferByHashResponse"
+              "$ref": "#/definitions/v1GetBackupTransferByUuidResponse"
             }
           },
           "400": {
@@ -618,15 +606,9 @@
         },
         "parameters": [
           {
-            "name": "transferHash",
+            "name": "uuid",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "recipient",
-            "in": "query",
-            "required": false,
             "type": "string"
           }
         ],
@@ -638,7 +620,7 @@
     "/v1/backups/transfers/list": {
       "post": {
         "summary": "GetBackupTransfersList processes a request for backup transfers list with pagination and filters",
-        "description": "## This method handles the backup transfers list with pagination and filters.\n\nOption for `orderBy` (default=`date_create`)\n\nOption for `sorting`: `asc`, `desc` (default=`desc`)\n\n** **\n\nIn body request need pass array of filters.\n\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Filter must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"relation\":   \"string\",\n     \"dataField\": \"string\",\n     \"condition\":  \"string\",\n     \"value\":      \"string\"\n   }\n   ```\n\u003c/details\u003e\n\nOption for `relation`: `and`, `or`\n\nOption for `dataField`:\n * `block_number`\n\nOption condition by `dataField`:\n * `block_number`: `lessThan`, `lessThanOrEqualTo`, `is`, `greaterThanOrEqualTo`, `greaterThan`.\n * `start_backup_time`: `lessThan`, `lessThanOrEqualTo`, `greaterThanOrEqualTo`, `greaterThan`.\n\nFilter `block_number`: `lessThan`, `lessThanOrEqualTo`, `is`, `greaterThanOrEqualTo`, `greaterThan`:\n * for filtering need set the value `value` with specified block number\n example: `value` = `1` (`is`).\n\nFilter `start_backup_time`: `lessThan`, `lessThanOrEqualTo`, `greaterThanOrEqualTo`, `greaterThan`:\n * for filtering need set the value `value` with specified the start backup time\n example: `value` = `2024-06-10T22:00:00.123Z` (`lessThanOrEqualTo`).\n\n** **\n\nIn body request need pass pagination\n\n`perPage` number of items to list per page (min = 0, max=100, default = 100 (if equal 0))\n\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"direction\": \"string\",\n     \"perPage\": \"string\",\n     \"cursor\": {\n       \"blockNumber\": \"string\",\n       \"sortingValue\": \"string\"\n     }\n   }\n   ```\n\u003c/details\u003e\n\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"perPage\": \"string\",\n     \"cursor\": {\n       \"prev\": {\n         \"blockNumber\": \"string\",\n         \"sortingValue\": \"string\"\n       },\n       \"next\": {\n         \"blockNumber\": \"string\",\n         \"sortingValue\": \"string\"\n       }\n     }\n   }\n   ```\n\u003c/details\u003e\n\nFirst request with empty pagination with request and empty list of items\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"perPage\": \"100\",\n     \"cursor\": null\n   }\n   ```\n\u003c/details\u003e\n\nA request with non-empty `pagination` made from a response with a non-empty list of elements and pagination (`sorting` is `asc`)\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response and next request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   Pagination from response\n   {\n     \"perPage\": \"100\",\n     \"cursor\": {\n       \"prev\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"1\"\n       },\n       \"next\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"100\"\n       }\n     }\n   }\n   Pagination for request from response with next values\n   {\n     \"perPage\": \"100\",\n     \"direction\": \"next\",\n     \"cursor\": {\n       \"blockNumber\": \"1\",\n       \"sorting_value\": \"100\"\n     }\n   }\n   ```\n\u003c/details\u003e\n\nA request with non-empty `pagination` made from a response with a non-empty list of elements and pagination (`sorting` is `desc`)\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response and next request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   Pagination from response\n   {\n     \"perPage\": \"10\",\n     \"cursor\": {\n       \"prev\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"10\"\n       },\n       \"next\": {\n         \"blockNumber\": \"1\",\n         \"sorting_value\": \"1\"\n       }\n     }\n   }\n   Pagination for request from response with next values\n   {\n     \"perPage\": \"10\",\n     \"direction\": \"next\",\n     \"cursor\": {\n       \"blockNumber\": \"1\",\n       \"sortingValue\": \"1\"\n     }\n   }\n   ```\n\u003c/details\u003e\n\nA request with non-empty pagination made from a response with a non-empty list of items and pagination for the situation when the end of the items list is reached.\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response and next request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   Pagination from response\n   {\n     \"perPage\": \"10\",\n     \"cursor\": {\n       \"prev\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"10\"\n       },\n       \"next\": {\n         \"blockNumber\": \"1\",\n         \"sorting_value\": \"1\"\n       }\n     }\n   }\n   Pagination for request from response with next values\n   {\n     \"perPage\": \"10\",\n     \"direction\": \"next\",\n     \"cursor\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"1\"\n     }\n   }\n   Pagination from response\n   {\n     \"perPage\": \"10\",\n     \"cursor\": {\n       \"prev\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"1\"\n       },\n       \"next\": {\n         \"blockNumber\": \"1\",\n         \"sortingValue\": \"1\"\n       }\n     }\n   }\n   ```\n\u003c/details\u003e",
+        "description": "## This method handles the backup transfers list with pagination and filters.\n\nOption for `orderBy` (default=`date_create`)\n\nOption for `sorting`: `asc`, `desc` (default=`desc`)\n\n** **\n\nIn body request need pass array of filters.\n\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Filter must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"relation\":   \"string\",\n     \"dataField\": \"string\",\n     \"condition\":  \"string\",\n     \"value\":      \"string\"\n   }\n   ```\n\u003c/details\u003e\n\nOption for `relation`: `and`, `or`\n\nOption for `dataField`:\n * `backup_start_time`\n\nOption condition by `dataField`:\n * `backup_start_time`: `lessThan`, `lessThanOrEqualTo`, `greaterThanOrEqualTo`, `greaterThan`.\n\nFilter `backup_start_time`: `lessThan`, `lessThanOrEqualTo`, `greaterThanOrEqualTo`, `greaterThan`:\n * for filtering need set the value `value` with specified the backup start time\n example: `value` = `2024-06-10T22:00:00.123Z` (`lessThanOrEqualTo`).\n\n** **\n\nIn body request need pass pagination\n\n`perPage` number of items to list per page (min = 0, max=100, default = 100 (if equal 0))\n\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"direction\": \"string\",\n     \"perPage\": \"string\",\n     \"cursor\": {\n       \"uuid\": \"string\",\n       \"sortingValue\": \"string\"\n     }\n   }\n   ```\n\u003c/details\u003e\n\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"perPage\": \"string\",\n     \"cursor\": {\n       \"prev\": {\n         \"uuid\": \"string\",\n         \"sortingValue\": \"string\"\n       },\n       \"next\": {\n         \"uuid\": \"string\",\n         \"sortingValue\": \"string\"\n       }\n     }\n   }\n   ```\n\u003c/details\u003e\n\nFirst request with empty pagination with request and empty list of items\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response must be of this struct:\n   \u003c/summary\u003e\n   ```\n   {\n     \"perPage\": \"100\",\n     \"cursor\": null\n   }\n   ```\n\u003c/details\u003e\n\nA request with non-empty `pagination` made from a response with a non-empty list of elements and pagination (`sorting` is `asc`)\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response and next request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   Pagination from response\n   {\n     \"perPage\": \"100\",\n     \"cursor\": {\n       \"prev\": {\n         \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n         \"sortingValue\": \"1\"\n       },\n       \"next\": {\n         \"uuid\": \"25a5cb38-9374-47bb-8efb-74d7c3202dad\",\n         \"sortingValue\": \"100\"\n       }\n     }\n   }\n   Pagination for request from response with next values\n   {\n     \"perPage\": \"100\",\n     \"direction\": \"next\",\n     \"cursor\": {\n       \"uuid\": \"25a5cb38-9374-47bb-8efb-74d7c3202dad\",\n       \"sorting_value\": \"100\"\n     }\n   }\n   ```\n\u003c/details\u003e\n\nA request with non-empty `pagination` made from a response with a non-empty list of elements and pagination (`sorting` is `desc`)\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response and next request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   Pagination from response\n   {\n     \"perPage\": \"10\",\n     \"cursor\": {\n       \"prev\": {\n         \"uuid\": \"5d31d229-3c1a-43d7-a5ae-eeca1c60f5f1\",\n         \"sortingValue\": \"10\"\n       },\n       \"next\": {\n         \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n         \"sorting_value\": \"1\"\n       }\n     }\n   }\n   Pagination for request from response with next values\n   {\n     \"perPage\": \"10\",\n     \"direction\": \"next\",\n     \"cursor\": {\n       \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n       \"sortingValue\": \"1\"\n     }\n   }\n   ```\n\u003c/details\u003e\n\nA request with non-empty pagination made from a response with a non-empty list of items and pagination for the situation when the end of the items list is reached.\n\u003cdetails\u003e\n   \u003csummary\u003e\n     Pagination for response and next request must be of this struct:\n   \u003c/summary\u003e\n   ```\n   Pagination from response\n   {\n     \"perPage\": \"10\",\n     \"cursor\": {\n       \"prev\": {\n         \"uuid\": \"5d31d229-3c1a-43d7-a5ae-eeca1c60f5f1\",\n         \"sortingValue\": \"10\"\n       },\n       \"next\": {\n         \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n         \"sorting_value\": \"1\"\n       }\n     }\n   }\n   Pagination for request from response with next values\n   {\n     \"perPage\": \"10\",\n     \"direction\": \"next\",\n     \"cursor\": {\n         \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n         \"sortingValue\": \"1\"\n     }\n   }\n   Pagination from response\n   {\n     \"perPage\": \"10\",\n     \"cursor\": {\n       \"prev\": {\n         \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n         \"sortingValue\": \"1\"\n       },\n       \"next\": {\n         \"uuid\": \"28b7596f-8966-483b-aa46-6a61aa91cecc\",\n         \"sortingValue\": \"1\"\n       }\n     }\n   }\n   ```\n\u003c/details\u003e",
         "operationId": "StoreVaultService_GetBackupTransfersList",
         "responses": {
           "200": {
@@ -751,14 +733,14 @@
     },
     "/v1/balances/{address}": {
       "get": {
-        "summary": "GetBalances retrieves balances for a given address",
-        "description": "## This method retrieves the balance for the provided address.",
-        "operationId": "StoreVaultService_GetBalances",
+        "summary": "GetBalancesByAddress retrieves balances for a given address",
+        "description": "## GetBalancesByAddress retrieves the balances for the provided address.",
+        "operationId": "StoreVaultService_GetBalancesByAddress",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1GetBalancesResponse"
+              "$ref": "#/definitions/v1GetBalancesByAddressResponse"
             }
           },
           "400": {
@@ -1445,37 +1427,33 @@
         }
       }
     },
-    "v1GetBackupDepositByHashResponse": {
+    "v1GetBackupDepositByUuidResponse": {
       "type": "object",
       "properties": {
         "success": {
           "type": "boolean"
         },
         "data": {
-          "$ref": "#/definitions/v1GetBackupDepositByHashResponseData"
+          "$ref": "#/definitions/v1GetBackupDepositByUuidResponseData"
         }
       }
     },
-    "v1GetBackupDepositByHashResponseData": {
+    "v1GetBackupDepositByUuidResponseData": {
       "type": "object",
       "properties": {
         "deposit": {
-          "$ref": "#/definitions/v1GetBackupDepositByHashResponseDeposit"
+          "$ref": "#/definitions/v1GetBackupDepositByUuidResponseDeposit"
         }
       }
     },
-    "v1GetBackupDepositByHashResponseDeposit": {
+    "v1GetBackupDepositByUuidResponseDeposit": {
       "type": "object",
       "properties": {
-        "id": {
+        "uuid": {
           "type": "string"
         },
         "recipient": {
           "type": "string"
-        },
-        "blockNumber": {
-          "type": "string",
-          "format": "uint64"
         },
         "encryptedDeposit": {
           "type": "string"
@@ -1517,9 +1495,9 @@
     "v1GetBackupDepositsListRequestCursorBase": {
       "type": "object",
       "properties": {
-        "blockNumber": {
+        "uuid": {
           "type": "string",
-          "title": "the number of block\nexample = \"1\""
+          "title": "the uuid of the backup deposit\nexample = \"1bf0fc62-d119-4059-8c96-499d6c95544e\""
         },
         "sortingValue": {
           "type": "string",
@@ -1592,9 +1570,9 @@
     "v1GetBackupDepositsListResponseCursorBase": {
       "type": "object",
       "properties": {
-        "blockNumber": {
+        "uuid": {
           "type": "string",
-          "title": "the number of block\nexample = \"1\""
+          "title": "the uuid of the backup transaction\nexample = \"1bf0fc62-d119-4059-8c96-499d6c95544e\""
         },
         "sortingValue": {
           "type": "string",
@@ -1621,18 +1599,11 @@
     "v1GetBackupDepositsListResponseDeposit": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string"
-        },
-        "depositHash": {
+        "uuid": {
           "type": "string"
         },
         "recipient": {
           "type": "string"
-        },
-        "blockNumber": {
-          "type": "string",
-          "format": "uint64"
         },
         "encryptedDeposit": {
           "type": "string"
@@ -1640,6 +1611,9 @@
         "createdAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "sortingValue": {
+          "type": "string"
         }
       }
     },
@@ -1688,15 +1662,11 @@
     "v1GetBackupDepositsResponseDeposit": {
       "type": "object",
       "properties": {
-        "id": {
+        "uuid": {
           "type": "string"
         },
         "recipient": {
           "type": "string"
-        },
-        "blockNumber": {
-          "type": "string",
-          "format": "uint64"
         },
         "encryptedDeposit": {
           "type": "string"
@@ -1720,29 +1690,29 @@
         }
       }
     },
-    "v1GetBackupTransactionByHashResponse": {
+    "v1GetBackupTransactionByUuidResponse": {
       "type": "object",
       "properties": {
         "success": {
           "type": "boolean"
         },
         "data": {
-          "$ref": "#/definitions/v1GetBackupTransactionByHashResponseData"
+          "$ref": "#/definitions/v1GetBackupTransactionByUuidResponseData"
         }
       }
     },
-    "v1GetBackupTransactionByHashResponseData": {
+    "v1GetBackupTransactionByUuidResponseData": {
       "type": "object",
       "properties": {
         "transaction": {
-          "$ref": "#/definitions/v1GetBackupTransactionByHashResponseTransaction"
+          "$ref": "#/definitions/v1GetBackupTransactionByUuidResponseTransaction"
         }
       }
     },
-    "v1GetBackupTransactionByHashResponseTransaction": {
+    "v1GetBackupTransactionByUuidResponseTransaction": {
       "type": "object",
       "properties": {
-        "id": {
+        "uuid": {
           "type": "string"
         },
         "sender": {
@@ -1751,16 +1721,8 @@
         "signature": {
           "type": "string"
         },
-        "blockNumber": {
-          "type": "string",
-          "format": "uint64"
-        },
         "encryptedTx": {
           "type": "string"
-        },
-        "encodingVersion": {
-          "type": "integer",
-          "format": "int64"
         },
         "createdAt": {
           "type": "string",
@@ -1799,9 +1761,9 @@
     "v1GetBackupTransactionsListRequestCursorBase": {
       "type": "object",
       "properties": {
-        "blockNumber": {
+        "uuid": {
           "type": "string",
-          "title": "the number of block\nexample = \"1\""
+          "title": "the uuid of the backup transaction\nexample = \"1bf0fc62-d119-4059-8c96-499d6c95544e\""
         },
         "sortingValue": {
           "type": "string",
@@ -1874,9 +1836,9 @@
     "v1GetBackupTransactionsListResponseCursorBase": {
       "type": "object",
       "properties": {
-        "blockNumber": {
+        "uuid": {
           "type": "string",
-          "title": "the number of block\nexample = \"1\""
+          "title": "the uuid of the backup transaction\nexample = \"1bf0fc62-d119-4059-8c96-499d6c95544e\""
         },
         "sortingValue": {
           "type": "string",
@@ -1916,7 +1878,7 @@
     "v1GetBackupTransactionsListResponseTransaction": {
       "type": "object",
       "properties": {
-        "id": {
+        "uuid": {
           "type": "string"
         },
         "sender": {
@@ -1925,20 +1887,15 @@
         "signature": {
           "type": "string"
         },
-        "blockNumber": {
-          "type": "string",
-          "format": "uint64"
-        },
         "encryptedTx": {
           "type": "string"
-        },
-        "encodingVersion": {
-          "type": "integer",
-          "format": "int64"
         },
         "createdAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "sortingValue": {
+          "type": "string"
         }
       }
     },
@@ -1987,7 +1944,7 @@
     "v1GetBackupTransactionsResponseTransaction": {
       "type": "object",
       "properties": {
-        "id": {
+        "uuid": {
           "type": "string"
         },
         "sender": {
@@ -1996,16 +1953,8 @@
         "signature": {
           "type": "string"
         },
-        "blockNumber": {
-          "type": "string",
-          "format": "uint64"
-        },
         "encryptedTx": {
           "type": "string"
-        },
-        "encodingVersion": {
-          "type": "integer",
-          "format": "int64"
         },
         "createdAt": {
           "type": "string",
@@ -2013,34 +1962,30 @@
         }
       }
     },
-    "v1GetBackupTransferByHashResponse": {
+    "v1GetBackupTransferByUuidResponse": {
       "type": "object",
       "properties": {
         "success": {
           "type": "boolean"
         },
         "data": {
-          "$ref": "#/definitions/v1GetBackupTransferByHashResponseData"
+          "$ref": "#/definitions/v1GetBackupTransferByUuidResponseData"
         }
       }
     },
-    "v1GetBackupTransferByHashResponseData": {
+    "v1GetBackupTransferByUuidResponseData": {
       "type": "object",
       "properties": {
         "transfer": {
-          "$ref": "#/definitions/v1GetBackupTransferByHashResponseTransfer"
+          "$ref": "#/definitions/v1GetBackupTransferByUuidResponseTransfer"
         }
       }
     },
-    "v1GetBackupTransferByHashResponseTransfer": {
+    "v1GetBackupTransferByUuidResponseTransfer": {
       "type": "object",
       "properties": {
-        "id": {
+        "uuid": {
           "type": "string"
-        },
-        "blockNumber": {
-          "type": "string",
-          "format": "uint64"
         },
         "recipient": {
           "type": "string"
@@ -2085,9 +2030,9 @@
     "v1GetBackupTransfersListRequestCursorBase": {
       "type": "object",
       "properties": {
-        "blockNumber": {
+        "uuid": {
           "type": "string",
-          "title": "the number of block\nexample = \"1\""
+          "title": "the uuid of the backup transfer\nexample = \"1bf0fc62-d119-4059-8c96-499d6c95544e\""
         },
         "sortingValue": {
           "type": "string",
@@ -2160,9 +2105,9 @@
     "v1GetBackupTransfersListResponseCursorBase": {
       "type": "object",
       "properties": {
-        "blockNumber": {
+        "uuid": {
           "type": "string",
-          "title": "the number of block\nexample = \"1\""
+          "title": "the uuid of the backup transfer\nexample = \"1bf0fc62-d119-4059-8c96-499d6c95544e\""
         },
         "sortingValue": {
           "type": "string",
@@ -2202,12 +2147,8 @@
     "v1GetBackupTransfersListResponseTransfer": {
       "type": "object",
       "properties": {
-        "id": {
+        "uuid": {
           "type": "string"
-        },
-        "blockNumber": {
-          "type": "string",
-          "format": "uint64"
         },
         "recipient": {
           "type": "string"
@@ -2218,6 +2159,9 @@
         "createdAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "sortingValue": {
+          "type": "string"
         }
       }
     },
@@ -2266,12 +2210,8 @@
     "v1GetBackupTransfersResponseTransfer": {
       "type": "object",
       "properties": {
-        "id": {
+        "uuid": {
           "type": "string"
-        },
-        "blockNumber": {
-          "type": "string",
-          "format": "uint64"
         },
         "recipient": {
           "type": "string"
@@ -2340,9 +2280,12 @@
         }
       }
     },
-    "v1GetBalancesResponse": {
+    "v1GetBalancesByAddressResponse": {
       "type": "object",
       "properties": {
+        "success": {
+          "type": "boolean"
+        },
         "deposits": {
           "type": "array",
           "items": {
@@ -2368,7 +2311,7 @@
           "title": "The list of transactions"
         }
       },
-      "description": "The response message containing a list of token balances."
+      "description": "GetBalancesByAddressResponse returns the response message containing a list of token balances by address."
     },
     "v1GetVerifyDepositConfirmationResponse": {
       "type": "object",

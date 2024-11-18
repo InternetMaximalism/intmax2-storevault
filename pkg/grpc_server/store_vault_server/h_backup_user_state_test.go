@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"intmax2-store-vault/configs"
-	bps "intmax2-store-vault/internal/balance_prover_service"
+	bpsTypes "intmax2-store-vault/internal/balance_prover_service/types"
 	intMaxTypes "intmax2-store-vault/internal/types"
 	postBackupUserState "intmax2-store-vault/internal/use_cases/post_backup_user_state"
 	"intmax2-store-vault/pkg/logger"
@@ -38,6 +38,7 @@ func TestBackupUserStateTest(t *testing.T) {
 	dbApp := NewMockSQLDriverApp(ctrl)
 	hc := health.NewHandler()
 	sb := NewMockServiceBlockchain(ctrl)
+	vdcs := NewMockVerifyDepositConfirmationService(ctrl)
 
 	const (
 		path1 = "../../../"
@@ -57,7 +58,7 @@ func TestBackupUserStateTest(t *testing.T) {
 
 	cmd := NewMockCommands(ctrl)
 
-	grpcServerStop, gwServer := Start(cmd, ctx, cfg, log, dbApp, &hc, sb)
+	grpcServerStop, gwServer := Start(cmd, ctx, cfg, log, dbApp, &hc, sb, vdcs)
 	defer grpcServerStop()
 
 	balanceProof, err := intMaxTypes.MakeSamplePlonky2Proof(dir)
@@ -65,7 +66,7 @@ func TestBackupUserStateTest(t *testing.T) {
 	b64 := balanceProof.ProofBase64String()
 	bp, err := intMaxTypes.NewCompressedPlonky2ProofFromBase64String(b64)
 	assert.NoError(t, err)
-	_, err = new(bps.BalancePublicInputs).FromPublicInputs(bp.PublicInputs)
+	_, err = new(bpsTypes.BalancePublicInputs).FromPublicInputs(bp.PublicInputs)
 	assert.NoError(t, err)
 
 	cases := []struct {

@@ -4,14 +4,17 @@ import (
 	"context"
 	"intmax2-store-vault/internal/open_telemetry"
 	node "intmax2-store-vault/internal/pb/gen/store_vault_service/node"
-	verifyDepositConfirmation "intmax2-store-vault/internal/use_cases/verify_deposit_confirmation"
+	getVerifyDepositConfirmation "intmax2-store-vault/internal/use_cases/get_verify_deposit_confirmation"
 	"intmax2-store-vault/pkg/grpc_server/utils"
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
 
-func (s *StoreVaultServer) GetVerifyDepositConfirmation(ctx context.Context, req *node.GetVerifyDepositConfirmationRequest) (*node.GetVerifyDepositConfirmationResponse, error) {
+func (s *StoreVaultServer) GetVerifyDepositConfirmation(
+	ctx context.Context,
+	req *node.GetVerifyDepositConfirmationRequest,
+) (*node.GetVerifyDepositConfirmationResponse, error) {
 	resp := node.GetVerifyDepositConfirmationResponse{}
 
 	const (
@@ -25,8 +28,8 @@ func (s *StoreVaultServer) GetVerifyDepositConfirmation(ctx context.Context, req
 		))
 	defer span.End()
 
-	input := verifyDepositConfirmation.UCGetVerifyDepositConfirmationInput{
-		DepositId: req.DepositId,
+	input := getVerifyDepositConfirmation.UCGetVerifyDepositConfirmationInput{
+		DepositID: req.DepositId,
 	}
 
 	err := input.Valid()
@@ -35,7 +38,8 @@ func (s *StoreVaultServer) GetVerifyDepositConfirmation(ctx context.Context, req
 		return &resp, utils.BadRequest(spanCtx, err)
 	}
 
-	result, err := s.commands.GetVerifyDepositConfirmation(s.config, s.log, s.sb).Do(spanCtx, &input)
+	var result *getVerifyDepositConfirmation.UCGetVerifyDepositConfirmation
+	result, err = s.commands.GetVerifyDepositConfirmation(s.config, s.log, s.vdcs).Do(spanCtx, &input)
 	if err != nil {
 		open_telemetry.MarkSpanError(spanCtx, err)
 		const msg = "failed to get verify deposit confirmation request: %v"
@@ -43,7 +47,7 @@ func (s *StoreVaultServer) GetVerifyDepositConfirmation(ctx context.Context, req
 	}
 
 	resp.Success = true
-	resp.Data = &node.GetVerifyDepositConfirmationResponse_Data{Confirmed: result}
+	resp.Data = &node.GetVerifyDepositConfirmationResponse_Data{Confirmed: result.IsVerifyDepositConfirmation}
 
 	return &resp, utils.OK(spanCtx)
 }

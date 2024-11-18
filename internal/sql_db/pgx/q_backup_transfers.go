@@ -64,18 +64,16 @@ func (p *pgx) GetBackupTransfer(condition, value string) (*mDBApp.BackupTransfer
 	return &transfer, nil
 }
 
-func (p *pgx) GetBackupTransferByRecipientAndTransferDoubleHash(
-	recipient, transferDoubleHash string,
-) (*mDBApp.BackupTransfer, error) {
+func (p *pgx) GetBackupTransferByID(id string) (*mDBApp.BackupTransfer, error) {
 	const (
 		q = `
         SELECT id, recipient, transfer_double_hash, encrypted_transfer, block_number, created_at
         FROM backup_transfers
-        WHERE recipient = $1 AND transfer_double_hash = $2 `
+        WHERE id = $1 `
 	)
 
 	var b models.BackupTransfer
-	err := errPgx.Err(p.queryRow(p.ctx, q, recipient, transferDoubleHash).
+	err := errPgx.Err(p.queryRow(p.ctx, q, id).
 		Scan(
 			&b.ID,
 			&b.Recipient,
@@ -178,7 +176,7 @@ WHERE recipient = @recipient %s
 
 	var revers bool
 	if pagination.Cursor != nil {
-		rID := pagination.Cursor.BN
+		rID := pagination.Cursor.ID
 		cond := mFL.LessSymbol
 		if sorting == mFL.SortingDESC && pagination.Direction == mFL.DirectionNext {
 			cond = mFL.LessSymbol
@@ -193,19 +191,12 @@ WHERE recipient = @recipient %s
 			cond = mFL.LessSymbol
 			revers = true
 		}
-		if revers && sorting == mFL.SortingASC ||
-			sorting == mFL.SortingASC && pagination.Direction == mFL.DirectionNext {
-			where += fmt.Sprintf(
-				"AND ((block_number, %s) %s ('%s', '%s') AND %s %s '%s')",
-				orderByValue, cond, rID, cursor, orderByValue, cond, cursor)
-		} else {
-			where += fmt.Sprintf(
-				"AND ((block_number, %s) %s ('%s', '%s'))",
-				orderByValue, cond, rID, cursor)
-		}
+		where += fmt.Sprintf(
+			"AND ((%s, id) %s ('%s', '%s'))",
+			orderByValue, cond, cursor, rID)
 	}
 
-	q += fmt.Sprintf(" ORDER BY block_number %s, %s %s", sorting, orderByValue, sorting)
+	q += fmt.Sprintf(" ORDER BY %s %s, id %s", orderByValue, sorting, sorting)
 
 	q += fmt.Sprintf(" FETCH FIRST %d ROWS ONLY ", pagination.Offset)
 
@@ -270,10 +261,10 @@ WHERE recipient = @recipient %s
 
 		paginator.Cursor = &mDBApp.CursorListOfBackupTransfers{
 			Prev: &mDBApp.CursorBaseOfListOfBackupTransfers{
-				BN: new(big.Int).SetUint64(list[startV].BlockNumber),
+				ID: list[startV].ID,
 			},
 			Next: &mDBApp.CursorBaseOfListOfBackupTransfers{
-				BN: new(big.Int).SetUint64(list[endV].BlockNumber),
+				ID: list[endV].ID,
 			},
 		}
 

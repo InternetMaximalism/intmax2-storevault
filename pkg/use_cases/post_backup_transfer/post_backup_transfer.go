@@ -2,15 +2,11 @@ package post_backup_transfer
 
 import (
 	"context"
-	"encoding/binary"
-	"fmt"
+	"errors"
 	"intmax2-store-vault/configs"
 	"intmax2-store-vault/internal/logger"
 	"intmax2-store-vault/internal/open_telemetry"
-	service "intmax2-store-vault/internal/store_vault_service"
-	intMaxTypes "intmax2-store-vault/internal/types"
 	postBackupTransfer "intmax2-store-vault/internal/use_cases/post_backup_transfer"
-	"io"
 
 	"go.opentelemetry.io/otel/attribute"
 )
@@ -36,7 +32,7 @@ func New(
 
 func (u *uc) Do(
 	ctx context.Context, input *postBackupTransfer.UCPostBackupTransferInput,
-) error {
+) (err error) {
 	const (
 		hName           = "UseCase PostBackupTransfer"
 		transferHashKey = "transfer_hash"
@@ -58,30 +54,14 @@ func (u *uc) Do(
 		attribute.Int64(blockNumberKey, int64(input.BlockNumber)),
 	)
 
-	err := service.PostBackupTransfer(ctx, u.cfg, u.log, u.db, input)
+	_, err = u.db.CreateBackupTransfer(
+		input.Recipient,
+		input.TransferHash,
+		input.EncryptedTransfer,
+		int64(input.BlockNumber),
+	)
 	if err != nil {
-		return fmt.Errorf("failed to post backup transfer: %w", err)
-	}
-
-	return nil
-}
-
-func WriteTransfer(buf io.Writer, transfer *intMaxTypes.Transfer) error {
-	_, err := buf.Write(transfer.Recipient.Marshal())
-	if err != nil {
-		return err
-	}
-	err = binary.Write(buf, binary.LittleEndian, transfer.TokenIndex)
-	if err != nil {
-		return err
-	}
-	_, err = buf.Write(transfer.Amount.Bytes())
-	if err != nil {
-		return err
-	}
-	_, err = buf.Write(transfer.Salt.Marshal())
-	if err != nil {
-		return err
+		return errors.Join(ErrCreateBackupTransferWithDBFail, err)
 	}
 
 	return nil

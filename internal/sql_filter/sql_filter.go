@@ -48,7 +48,7 @@ func (c *SQLFilter) FilterDataToWhereQuery(
 func (c *SQLFilter) dataFieldToColumn(dataField models.DataField) (column string) {
 	if dataField == models.DataFieldBlockNumber {
 		column = "block_number"
-	} else if dataField == models.DataFieldStartBackupTime {
+	} else if dataField == models.DataFieldBackupStartTime {
 		column = "created_at"
 	}
 
@@ -124,7 +124,7 @@ func (c *SQLFilter) filterToQueryWithParams(
 	placeholder, placeholderKey := c.generatePlaceholderWithKey()
 
 	if filter.DataField == models.DataFieldBlockNumber ||
-		filter.DataField == models.DataFieldStartBackupTime {
+		filter.DataField == models.DataFieldBackupStartTime {
 		const mask = "(%s %s %s)"
 		query = fmt.Sprintf(mask, column, expression, placeholder)
 	}

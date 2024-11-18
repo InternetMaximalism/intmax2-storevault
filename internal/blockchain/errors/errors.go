@@ -25,6 +25,9 @@ const ErrScrollChainIDInvalidStr = "the scroll chain ID must be equal: %s, %s"
 // ErrEthereumChainIDInvalidStr error: the ethereum chain ID must be equal: %s, %s.
 const ErrEthereumChainIDInvalidStr = "the ethereum chain ID must be equal: %s, %s"
 
+// ErrStdinProcessingFail error: stdin processing error occurred.
+var ErrStdinProcessingFail = errors.New("stdin processing error occurred")
+
 // ErrEthClientDialFail error: failed to dial ETH client.
 var ErrEthClientDialFail = errors.New("failed to dial ETH client")
 

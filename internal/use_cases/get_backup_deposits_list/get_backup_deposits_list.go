@@ -10,8 +10,7 @@ import (
 //go:generate mockgen -destination=../mocks/mock_get_backup_deposits_list.go -package=mocks -source=get_backup_deposits_list.go
 
 type UCGetBackupDepositsListCursorBase struct {
-	BlockNumber         string   `json:"block_number"`
-	ConvertBlockNumber  *big.Int `json:"-"`
+	Uuid                string   `json:"uuid"`
 	SortingValue        string   `json:"sorting_value"`
 	ConvertSortingValue *big.Int `json:"-"`
 }
@@ -32,27 +31,28 @@ type UCGetBackupDepositsListInput struct {
 }
 
 type UCGetBackupDepositsListCursorList struct {
-	Prev *UCGetBackupDepositsListCursorBase `json:"prev"`
-	Next *UCGetBackupDepositsListCursorBase `json:"next"`
+	Prev *UCGetBackupDepositsListCursorBase
+	Next *UCGetBackupDepositsListCursorBase
 }
 
 type UCGetBackupDepositsListPaginationOfList struct {
-	PerPage string                             `json:"per_page"`
-	Cursor  *UCGetBackupDepositsListCursorList `json:"cursor"`
+	PerPage string
+	Cursor  *UCGetBackupDepositsListCursorList
 }
 
 type ItemOfGetBackupDepositsList struct {
-	ID                string    `json:"id"`
-	Recipient         string    `json:"recipient"`
-	DepositDoubleHash string    `json:"deposit_double_hash"`
-	EncryptedDeposit  string    `json:"encrypted_deposit"`
-	BlockNumber       int64     `json:"block_number"`
-	CreatedAt         time.Time `json:"created_at"`
+	Uuid              string
+	Recipient         string
+	DepositDoubleHash string
+	EncryptedDeposit  string
+	BlockNumber       int64
+	CreatedAt         time.Time
+	SortingValue      string
 }
 
 type UCGetBackupDepositsList struct {
-	Pagination UCGetBackupDepositsListPaginationOfList `json:"pagination"`
-	List       []ItemOfGetBackupDepositsList           `json:"list"`
+	Pagination UCGetBackupDepositsListPaginationOfList
+	List       []ItemOfGetBackupDepositsList
 }
 
 // UseCaseGetBackupDepositsList describes GetBackupDepositsList contract.

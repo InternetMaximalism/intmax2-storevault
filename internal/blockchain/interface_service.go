@@ -10,5 +10,7 @@ type ServiceBlockchain interface {
 
 type ChainSB interface {
 	ScrollNetworkChainLinkEvmJSONRPC(ctx context.Context) (string, error)
+	SetupEthereumNetworkChainID(ctx context.Context) error
+	SetupScrollNetworkChainID(ctx context.Context) error
 	EthereumNetworkChainLinkEvmJSONRPC(ctx context.Context) (string, error)
 }

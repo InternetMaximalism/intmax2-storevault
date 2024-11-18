@@ -36,7 +36,7 @@ type DataField string
 
 const (
 	DataFieldBlockNumber     DataField = "block_number"
-	DataFieldStartBackupTime DataField = "start_backup_time"
+	DataFieldBackupStartTime DataField = "backup_start_time"
 )
 
 type Condition string

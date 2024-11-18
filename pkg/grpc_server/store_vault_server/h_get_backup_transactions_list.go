@@ -56,7 +56,7 @@ func (s *StoreVaultServer) GetBackupTransactionsList(
 
 		if req.Pagination.Cursor != nil {
 			input.Pagination.Cursor = &getBackupTransactionsList.UCGetBackupTransactionsListCursorBase{
-				BlockNumber:  req.Pagination.Cursor.BlockNumber,
+				Uuid:         req.Pagination.Cursor.Uuid,
 				SortingValue: req.Pagination.Cursor.SortingValue,
 			}
 		}
@@ -107,24 +107,24 @@ func (s *StoreVaultServer) GetBackupTransactionsList(
 		resp.Data.Pagination.Cursor = &node.GetBackupTransactionsListResponse_Cursor{}
 		if list.Pagination.Cursor.Prev != nil {
 			resp.Data.Pagination.Cursor.Prev = &node.GetBackupTransactionsListResponse_CursorBase{
-				BlockNumber:  list.Pagination.Cursor.Prev.BlockNumber,
+				Uuid:         list.Pagination.Cursor.Prev.Uuid,
 				SortingValue: list.Pagination.Cursor.Prev.SortingValue,
 			}
 		}
 		if list.Pagination.Cursor.Next != nil {
 			resp.Data.Pagination.Cursor.Next = &node.GetBackupTransactionsListResponse_CursorBase{
-				BlockNumber:  list.Pagination.Cursor.Next.BlockNumber,
+				Uuid:         list.Pagination.Cursor.Next.Uuid,
 				SortingValue: list.Pagination.Cursor.Next.SortingValue,
 			}
 		}
 	} else if input.Pagination != nil && input.Pagination.Cursor != nil {
 		resp.Data.Pagination.Cursor = &node.GetBackupTransactionsListResponse_Cursor{
 			Prev: &node.GetBackupTransactionsListResponse_CursorBase{
-				BlockNumber:  input.Pagination.Cursor.BlockNumber,
+				Uuid:         input.Pagination.Cursor.Uuid,
 				SortingValue: input.Pagination.Cursor.SortingValue,
 			},
 			Next: &node.GetBackupTransactionsListResponse_CursorBase{
-				BlockNumber:  input.Pagination.Cursor.BlockNumber,
+				Uuid:         input.Pagination.Cursor.Uuid,
 				SortingValue: input.Pagination.Cursor.SortingValue,
 			},
 		}
@@ -133,15 +133,15 @@ func (s *StoreVaultServer) GetBackupTransactionsList(
 	resp.Data.Transactions = make([]*node.GetBackupTransactionsListResponse_Transaction, len(list.List))
 	for key := range list.List {
 		resp.Data.Transactions[key] = &node.GetBackupTransactionsListResponse_Transaction{
-			Id:          list.List[key].ID,
+			Uuid:        list.List[key].Uuid,
 			Sender:      list.List[key].Sender,
 			Signature:   list.List[key].Signature,
-			BlockNumber: uint64(list.List[key].BlockNumber),
 			EncryptedTx: list.List[key].EncryptedTx,
 			CreatedAt: &timestamppb.Timestamp{
 				Seconds: list.List[key].CreatedAt.Unix(),
 				Nanos:   int32(list.List[key].CreatedAt.Nanosecond()),
 			},
+			SortingValue: list.List[key].SortingValue,
 		}
 	}
 

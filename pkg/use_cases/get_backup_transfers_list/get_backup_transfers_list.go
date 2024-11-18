@@ -7,8 +7,10 @@ import (
 	"intmax2-store-vault/configs"
 	"intmax2-store-vault/internal/logger"
 	"intmax2-store-vault/internal/open_telemetry"
+	mFL "intmax2-store-vault/internal/sql_filter/models"
 	getBackupTransfersList "intmax2-store-vault/internal/use_cases/get_backup_transfers_list"
 	mDBApp "intmax2-store-vault/pkg/sql_db/db_app/models"
+	"math/big"
 	"strconv"
 
 	"go.opentelemetry.io/otel/attribute"
@@ -62,7 +64,7 @@ func (u *uc) Do(
 		pagination.Offset = input.Pagination.Offset
 		if input.Pagination.Cursor != nil {
 			pagination.Cursor = &mDBApp.CursorBaseOfListOfBackupTransfers{
-				BN:           input.Pagination.Cursor.ConvertBlockNumber,
+				ID:           input.Pagination.Cursor.Uuid,
 				SortingValue: input.Pagination.Cursor.ConvertSortingValue,
 			}
 		}
@@ -98,13 +100,13 @@ func (u *uc) Do(
 		resp.Pagination.Cursor = &getBackupTransfersList.UCGetBackupTransfersListCursorList{}
 		if paginator.Cursor.Prev != nil {
 			resp.Pagination.Cursor.Prev = &getBackupTransfersList.UCGetBackupTransfersListCursorBase{
-				BlockNumber:  paginator.Cursor.Prev.BN.String(),
+				Uuid:         paginator.Cursor.Prev.ID,
 				SortingValue: paginator.Cursor.Prev.SortingValue.String(),
 			}
 		}
 		if paginator.Cursor.Next != nil {
 			resp.Pagination.Cursor.Next = &getBackupTransfersList.UCGetBackupTransfersListCursorBase{
-				BlockNumber:  paginator.Cursor.Next.BN.String(),
+				Uuid:         paginator.Cursor.Next.ID,
 				SortingValue: paginator.Cursor.Next.SortingValue.String(),
 			}
 		}
@@ -112,12 +114,18 @@ func (u *uc) Do(
 
 	for key := range listDBApp {
 		resp.List[key] = getBackupTransfersList.ItemOfGetBackupTransfersList{
-			ID:                 listDBApp[key].ID,
+			Uuid:               listDBApp[key].ID,
 			Recipient:          listDBApp[key].Recipient,
 			TransferDoubleHash: listDBApp[key].TransferDoubleHash,
 			EncryptedTransfer:  listDBApp[key].EncryptedTransfer,
 			BlockNumber:        int64(listDBApp[key].BlockNumber),
 			CreatedAt:          listDBApp[key].CreatedAt,
+		}
+		switch input.OrderBy {
+		case mFL.DateCreate:
+			resp.List[key].SortingValue = new(big.Int).SetInt64(listDBApp[key].CreatedAt.UTC().UnixNano()).String()
+		default:
+			resp.List[key].SortingValue = new(big.Int).SetInt64(listDBApp[key].CreatedAt.UTC().UnixNano()).String()
 		}
 	}
 

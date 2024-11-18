@@ -2,36 +2,40 @@ package get_verify_deposit_confirmation
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"intmax2-store-vault/configs"
 	"intmax2-store-vault/internal/logger"
 	"intmax2-store-vault/internal/open_telemetry"
-	service "intmax2-store-vault/internal/store_vault_service"
-	verifyDepositConfirmation "intmax2-store-vault/internal/use_cases/verify_deposit_confirmation"
+	getVerifyDepositConfirmation "intmax2-store-vault/internal/use_cases/get_verify_deposit_confirmation"
 
 	"go.opentelemetry.io/otel/attribute"
 )
 
 // uc describes use case
 type uc struct {
-	cfg *configs.Config
-	log logger.Logger
-	sb  ServiceBlockchain
+	cfg  *configs.Config
+	log  logger.Logger
+	vdcs VerifyDepositConfirmationService
 }
 
-func New(cfg *configs.Config, log logger.Logger, sb ServiceBlockchain) verifyDepositConfirmation.UseCaseGetVerifyDepositConfirmation {
+func New(
+	cfg *configs.Config,
+	log logger.Logger,
+	vdcs VerifyDepositConfirmationService,
+) getVerifyDepositConfirmation.UseCaseGetVerifyDepositConfirmation {
 	return &uc{
-		cfg: cfg,
-		log: log,
-		sb:  sb,
+		cfg:  cfg,
+		log:  log,
+		vdcs: vdcs,
 	}
 }
 
 func (u *uc) Do(
-	ctx context.Context, input *verifyDepositConfirmation.UCGetVerifyDepositConfirmationInput,
-) (bool, error) {
+	ctx context.Context,
+	input *getVerifyDepositConfirmation.UCGetVerifyDepositConfirmationInput,
+) (*getVerifyDepositConfirmation.UCGetVerifyDepositConfirmation, error) {
 	const (
-		hName     = "UseCase GetBalances"
+		hName     = "UseCase GetVerifyDepositConfirmation"
 		depositId = "depositId"
 	)
 
@@ -39,18 +43,21 @@ func (u *uc) Do(
 	defer span.End()
 
 	if input == nil {
-		open_telemetry.MarkSpanError(spanCtx, ErrUCGetVerifyDepositConfirmationInputInputEmpty)
-		return false, ErrUCGetVerifyDepositConfirmationInputInputEmpty
+		open_telemetry.MarkSpanError(spanCtx, ErrUCGetVerifyDepositConfirmationInputEmpty)
+		return nil, ErrUCGetVerifyDepositConfirmationInputEmpty
 	}
 
 	span.SetAttributes(
-		attribute.String(depositId, input.DepositId),
+		attribute.String(depositId, input.DepositID),
 	)
 
-	confirmed, err := service.GetVerifyDepositConfirmation(ctx, u.cfg, u.log, u.sb, input)
+	confirmed, err := u.vdcs.GetVerifyDepositConfirmation(spanCtx, input.ConvertDepositID.ToBig())
 	if err != nil {
-		return false, fmt.Errorf("failed to get verify deposit confirmation: %w", err)
+		open_telemetry.MarkSpanError(spanCtx, err)
+		return nil, errors.Join(ErrGetVerifyDepositConfirmationFail, err)
 	}
 
-	return confirmed, nil
+	return &getVerifyDepositConfirmation.UCGetVerifyDepositConfirmation{
+		IsVerifyDepositConfirmation: confirmed,
+	}, nil
 }
