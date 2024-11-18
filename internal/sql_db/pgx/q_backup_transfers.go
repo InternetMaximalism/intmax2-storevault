@@ -64,18 +64,16 @@ func (p *pgx) GetBackupTransfer(condition, value string) (*mDBApp.BackupTransfer
 	return &transfer, nil
 }
 
-func (p *pgx) GetBackupTransferByIDAndRecipient(
-	id, recipient string,
-) (*mDBApp.BackupTransfer, error) {
+func (p *pgx) GetBackupTransferByID(id string) (*mDBApp.BackupTransfer, error) {
 	const (
 		q = `
         SELECT id, recipient, transfer_double_hash, encrypted_transfer, block_number, created_at
         FROM backup_transfers
-        WHERE id = $1 AND recipient = $2 `
+        WHERE id = $1 `
 	)
 
 	var b models.BackupTransfer
-	err := errPgx.Err(p.queryRow(p.ctx, q, id, recipient).
+	err := errPgx.Err(p.queryRow(p.ctx, q, id).
 		Scan(
 			&b.ID,
 			&b.Recipient,

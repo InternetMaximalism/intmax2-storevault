@@ -34,8 +34,7 @@ func (s *StoreVaultServer) GetBackupTransferByUuid(
 	defer span.End()
 
 	input := getBackupTransferByUuid.UCGetBackupTransferByUuidInput{
-		Recipient: req.Recipient,
-		Uuid:      req.Uuid,
+		Uuid: req.Uuid,
 	}
 
 	err := input.Valid()

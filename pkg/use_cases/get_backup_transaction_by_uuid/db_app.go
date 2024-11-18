@@ -11,5 +11,5 @@ type SQLDriverApp interface {
 }
 
 type BackupTransactions interface {
-	GetBackupTransactionByIDAndSender(id, sender string) (*mDBApp.BackupTransaction, error)
+	GetBackupTransactionByID(id string) (*mDBApp.BackupTransaction, error)
 }

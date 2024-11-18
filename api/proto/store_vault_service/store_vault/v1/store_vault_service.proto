@@ -921,8 +921,7 @@ message GetBackupTransfersListResponse {
 }
 
 message GetBackupTransferByUuidRequest {
-  string recipient = 1;
-  string uuid = 2;
+  string uuid = 1;
 }
 
 message GetBackupTransferByUuidResponse {
@@ -1095,8 +1094,7 @@ message GetBackupTransactionsListResponse {
 }
 
 message GetBackupTransactionByUuidRequest {
-  string sender = 1;
-  string uuid = 2;
+  string uuid = 1;
 }
 
 message GetBackupTransactionByUuidResponse {
@@ -1117,8 +1115,7 @@ message GetBackupTransactionByUuidResponse {
 }
 
 message GetBackupDepositByUuidRequest {
-  string recipient = 1;
-  string uuid = 2;
+  string uuid = 1;
 }
 
 message GetBackupDepositByUuidResponse {

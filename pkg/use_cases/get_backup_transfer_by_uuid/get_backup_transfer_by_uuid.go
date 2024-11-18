@@ -35,9 +35,8 @@ func (u *uc) Do(
 	input *getBackupTransferByUuid.UCGetBackupTransferByUuidInput,
 ) (*getBackupTransferByUuid.UCGetBackupTransferByUuid, error) {
 	const (
-		hName        = "UseCase GetBackupTransferByUuid"
-		recipientKey = "recipient"
-		uuidKey      = "uuid"
+		hName   = "UseCase GetBackupTransferByUuid"
+		uuidKey = "uuid"
 	)
 
 	spanCtx, span := open_telemetry.Tracer().Start(ctx, hName)
@@ -50,12 +49,11 @@ func (u *uc) Do(
 
 	span.SetAttributes(
 		attribute.String(uuidKey, input.Uuid),
-		attribute.String(recipientKey, input.Recipient),
 	)
 
-	transfer, err := u.db.GetBackupTransferByIDAndRecipient(input.Uuid, input.Recipient)
+	transfer, err := u.db.GetBackupTransferByID(input.Uuid)
 	if err != nil {
-		return nil, errors.Join(ErrGetBackupTransferByIDAndRecipientFail, err)
+		return nil, errors.Join(ErrGetBackupTransferByIDFail, err)
 	}
 
 	result := getBackupTransferByUuid.UCGetBackupTransferByUuid{

@@ -35,9 +35,8 @@ func (u *uc) Do(
 	input *getBackupDepositByUuid.UCGetBackupDepositByUuidInput,
 ) (*getBackupDepositByUuid.UCGetBackupDepositByUuid, error) {
 	const (
-		hName     = "UseCase GetBackupDepositByUuid"
-		senderKey = "sender"
-		uuidKey   = "uuid"
+		hName   = "UseCase GetBackupDepositByUuid"
+		uuidKey = "uuid"
 	)
 
 	spanCtx, span := open_telemetry.Tracer().Start(ctx, hName)
@@ -50,12 +49,11 @@ func (u *uc) Do(
 
 	span.SetAttributes(
 		attribute.String(uuidKey, input.Uuid),
-		attribute.String(senderKey, input.Recipient),
 	)
 
-	deposit, err := u.db.GetBackupDepositByIDAndRecipient(input.Uuid, input.Recipient)
+	deposit, err := u.db.GetBackupDepositByID(input.Uuid)
 	if err != nil {
-		return nil, errors.Join(ErrGetBackupDepositByIDAndRecipientFail, err)
+		return nil, errors.Join(ErrGetBackupDepositByIDFail, err)
 	}
 
 	return &getBackupDepositByUuid.UCGetBackupDepositByUuid{

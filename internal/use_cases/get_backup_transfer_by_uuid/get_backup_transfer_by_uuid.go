@@ -20,8 +20,7 @@ type UCGetBackupTransferByUuid struct {
 }
 
 type UCGetBackupTransferByUuidInput struct {
-	Recipient string `json:"recipient"`
-	Uuid      string `json:"uuid"`
+	Uuid string `json:"uuid"`
 }
 
 type UseCaseGetBackupTransferByUuid interface {

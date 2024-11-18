@@ -35,9 +35,8 @@ func (u *uc) Do(
 	input *getBackupTransactionByUuid.UCGetBackupTransactionByUuidInput,
 ) (*getBackupTransactionByUuid.UCGetBackupTransactionByUuid, error) {
 	const (
-		hName     = "UseCase GetBackupTransactionByUuid"
-		senderKey = "sender"
-		uuidKey   = "uuid"
+		hName   = "UseCase GetBackupTransactionByUuid"
+		uuidKey = "uuid"
 	)
 
 	spanCtx, span := open_telemetry.Tracer().Start(ctx, hName)
@@ -50,12 +49,11 @@ func (u *uc) Do(
 
 	span.SetAttributes(
 		attribute.String(uuidKey, input.Uuid),
-		attribute.String(senderKey, input.Sender),
 	)
 
-	transaction, err := u.db.GetBackupTransactionByIDAndSender(input.Uuid, input.Sender)
+	transaction, err := u.db.GetBackupTransactionByID(input.Uuid)
 	if err != nil {
-		return nil, errors.Join(ErrGetBackupTransactionByIDAndSenderFail, err)
+		return nil, errors.Join(ErrGetBackupTransactionByIDFail, err)
 	}
 
 	return &getBackupTransactionByUuid.UCGetBackupTransactionByUuid{

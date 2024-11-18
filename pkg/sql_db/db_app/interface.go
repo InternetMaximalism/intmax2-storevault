@@ -38,9 +38,7 @@ type BackupTransfers interface {
 		blockNumber int64,
 	) (*models.BackupTransfer, error)
 	GetBackupTransfer(condition string, value string) (*models.BackupTransfer, error)
-	GetBackupTransferByIDAndRecipient(
-		id, recipient string,
-	) (*models.BackupTransfer, error)
+	GetBackupTransferByID(id string) (*models.BackupTransfer, error)
 	GetBackupTransfers(condition string, value interface{}) ([]*models.BackupTransfer, error)
 	GetBackupTransfersByRecipient(
 		recipient string,
@@ -60,7 +58,7 @@ type BackupTransactions interface {
 		blockNumber int64,
 	) (*models.BackupTransaction, error)
 	GetBackupTransaction(condition string, value string) (*models.BackupTransaction, error)
-	GetBackupTransactionByIDAndSender(id, sender string) (*models.BackupTransaction, error)
+	GetBackupTransactionByID(id string) (*models.BackupTransaction, error)
 	GetBackupTransactions(condition string, value interface{}) ([]*models.BackupTransaction, error)
 	GetBackupTransactionsBySender(
 		sender string,
@@ -79,9 +77,7 @@ type BackupDeposits interface {
 		recipient, depositHash, encryptedDeposit string,
 		blockNumber int64,
 	) (*models.BackupDeposit, error)
-	GetBackupDepositByIDAndRecipient(
-		id, recipient string,
-	) (*models.BackupDeposit, error)
+	GetBackupDepositByID(id string) (*models.BackupDeposit, error)
 	GetBackupDeposit(conditions []string, values []interface{}) (*models.BackupDeposit, error)
 	GetBackupDeposits(condition string, value interface{}) ([]*models.BackupDeposit, error)
 	GetBackupDepositsByRecipient(

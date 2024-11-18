@@ -232,12 +232,6 @@
             "in": "path",
             "required": true,
             "type": "string"
-          },
-          {
-            "name": "recipient",
-            "in": "query",
-            "required": false,
-            "type": "string"
           }
         ],
         "tags": [
@@ -449,12 +443,6 @@
             "in": "path",
             "required": true,
             "type": "string"
-          },
-          {
-            "name": "sender",
-            "in": "query",
-            "required": false,
-            "type": "string"
           }
         ],
         "tags": [
@@ -621,12 +609,6 @@
             "name": "uuid",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "recipient",
-            "in": "query",
-            "required": false,
             "type": "string"
           }
         ],

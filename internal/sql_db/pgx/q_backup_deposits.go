@@ -39,18 +39,16 @@ func (p *pgx) CreateBackupDeposit(
 	return p.GetBackupDeposit([]string{"id"}, []interface{}{id})
 }
 
-func (p *pgx) GetBackupDepositByIDAndRecipient(
-	id, recipient string,
-) (*mDBApp.BackupDeposit, error) {
+func (p *pgx) GetBackupDepositByID(id string) (*mDBApp.BackupDeposit, error) {
 	const (
 		q = `
         SELECT id, recipient, deposit_double_hash, encrypted_deposit, block_number, created_at
         FROM backup_deposits
-        WHERE id = $1 AND recipient = $2 `
+        WHERE id = $1 `
 	)
 
 	var b models.BackupDeposit
-	err := errPgx.Err(p.queryRow(p.ctx, q, id, recipient).
+	err := errPgx.Err(p.queryRow(p.ctx, q, id).
 		Scan(
 			&b.ID,
 			&b.Recipient,

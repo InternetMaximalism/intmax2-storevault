@@ -5,7 +5,5 @@ import "errors"
 // ErrUCGetBackupTransferByUuidInputEmpty error: ucGetBackupTransferByUuidInput must not be empty.
 var ErrUCGetBackupTransferByUuidInputEmpty = errors.New("ucGetBackupTransferByUuidInput must not be empty")
 
-// ErrGetBackupTransferByIDAndRecipientFail error: failed to get backup transfer by id and recipient.
-var ErrGetBackupTransferByIDAndRecipientFail = errors.New(
-	"failed to get backup transfer by id and recipient",
-)
+// ErrGetBackupTransferByIDFail error: failed to get backup transfer by id.
+var ErrGetBackupTransferByIDFail = errors.New("failed to get backup transfer by id")

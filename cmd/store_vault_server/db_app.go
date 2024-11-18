@@ -36,9 +36,7 @@ type BackupTransfers interface {
 		blockNumber int64,
 	) (*mDBApp.BackupTransfer, error)
 	GetBackupTransfer(condition string, value string) (*mDBApp.BackupTransfer, error)
-	GetBackupTransferByIDAndRecipient(
-		id, recipient string,
-	) (*mDBApp.BackupTransfer, error)
+	GetBackupTransferByID(id string) (*mDBApp.BackupTransfer, error)
 	GetBackupTransfers(condition string, value interface{}) ([]*mDBApp.BackupTransfer, error)
 	GetBackupTransfersByRecipient(
 		recipient string,
@@ -58,7 +56,7 @@ type BackupTransactions interface {
 		blockNumber int64,
 	) (*mDBApp.BackupTransaction, error)
 	GetBackupTransaction(condition string, value string) (*mDBApp.BackupTransaction, error)
-	GetBackupTransactionByIDAndSender(id, sender string) (*mDBApp.BackupTransaction, error)
+	GetBackupTransactionByID(id string) (*mDBApp.BackupTransaction, error)
 	GetBackupTransactions(condition string, value interface{}) ([]*mDBApp.BackupTransaction, error)
 	GetBackupTransactionsBySender(
 		sender string,
@@ -77,9 +75,7 @@ type BackupDeposits interface {
 		recipient, depositHash, encryptedDeposit string,
 		blockNumber int64,
 	) (*mDBApp.BackupDeposit, error)
-	GetBackupDepositByIDAndRecipient(
-		id, recipient string,
-	) (*mDBApp.BackupDeposit, error)
+	GetBackupDepositByID(id string) (*mDBApp.BackupDeposit, error)
 	GetBackupDeposit(conditions []string, values []interface{}) (*mDBApp.BackupDeposit, error)
 	GetBackupDeposits(condition string, value interface{}) ([]*mDBApp.BackupDeposit, error)
 	GetBackupDepositsByRecipient(

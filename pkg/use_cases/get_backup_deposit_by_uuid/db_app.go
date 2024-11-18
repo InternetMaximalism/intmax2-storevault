@@ -11,7 +11,5 @@ type SQLDriverApp interface {
 }
 
 type BackupDeposits interface {
-	GetBackupDepositByIDAndRecipient(
-		id, recipient string,
-	) (*mDBApp.BackupDeposit, error)
+	GetBackupDepositByID(id string) (*mDBApp.BackupDeposit, error)
 }
