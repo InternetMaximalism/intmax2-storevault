@@ -11,6 +11,7 @@ import "store_vault/v1/transfers_service.proto";
 import "store_vault/v1/transactions_service.proto";
 import "store_vault/v1/deposits_service.proto";
 import "store_vault/v1/balances_service.proto";
+import "store_vault/v1/user_data_service.proto";
 
 // Defines the import path that should be used to import the generated package,
 // and the package name.

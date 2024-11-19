@@ -1,0 +1,124 @@
+syntax = "proto3";
+
+package store_vault.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "tagger/tagger.proto";
+
+// Defines the import path that should be used to import the generated package,
+// and the package name.
+option go_package = ".;store_vault";
+
+// UserDataService definition for Data Store Vault
+service UserDataService {
+  // PutUserData processes a request for updating of user-data
+  //
+  // ## PutUserData processes a request for updating of user-data.
+  //
+  // If needs to delete a `setting`, simply provide the `encrypted_info` value equal to `␡` (Unicode DELETE character `\u2421`).
+  rpc PutUserData(PutUserDataRequest) returns (PutUserDataResponse) {
+    option (google.api.http) = {
+      put: "/v1/user-data"
+      body: "*"
+    };
+  }
+  // GetUserData processes a request for getting of user-data
+  //
+  // ## GetUserData processes a request for getting of user-data.
+  rpc GetUserData(GetUserDataRequest) returns (GetUserDataResponse) {
+    option (google.api.http) = {
+      post: "/v1/user-data"
+      body: "*"
+    };
+  }
+}
+
+// PutUserDataRequest describes request for updating of user-data
+message PutUserDataRequest {
+  // the access token
+  string access_token = 1 [json_name="accessToken", (tagger.tags)="json:\"accessToken,omitempty\""];
+  // the encrypted user data
+  repeated EncryptedUserData encrypted_user_data = 10 [json_name="encryptedUserData", (tagger.tags)="json:\"encryptedUserData,omitempty\""];
+  // The recipient address
+  string recipient = 40 [json_name="recipient", (tagger.tags)="json:\"recipient,omitempty\""];
+
+  // EncryptedUserData is the setting with encrypted info
+  message EncryptedUserData {
+    // the setting name
+    string setting = 10 [json_name="setting", (tagger.tags)="json:\"setting,omitempty\""];
+    // the encrypted info
+    string encrypted_info = 20 [json_name="encryptedInfo", (tagger.tags)="json:\"encryptedInfo,omitempty\""];
+  }
+}
+
+// PutUserDataResponse describes response for updating of user-data
+message PutUserDataResponse {
+  // the indicates if the action was successful
+  bool success = 1 [json_name="success", (tagger.tags)="json:\"success,omitempty\""];
+  // the additional data related to the response
+  Data data = 2 [json_name="data", (tagger.tags)="json:\"data,omitempty\""];
+
+  // Data is the nested message containing detailed response information
+  message Data {
+    // the message is indicating the result of the updates
+    repeated Message messages = 1 [json_name="messages", (tagger.tags)="json:\"messages,omitempty\""];
+  }
+
+  // Message is the nested message containing response information about the updates
+  message Message {
+    // the setting name
+    string setting = 10 [json_name="setting", (tagger.tags)="json:\"setting,omitempty\""];
+    // the message about error
+    string message = 20 [json_name="message", (tagger.tags)="json:\"message,omitempty\""];
+  }
+}
+
+// GetUserDataRequest describes request for getting of user-data
+message GetUserDataRequest {
+  // the access token
+  string access_token = 1 [json_name="accessToken", (tagger.tags)="json:\"accessToken,omitempty\""];
+  // the setting name
+  repeated string setting = 10 [json_name="setting", (tagger.tags)="json:\"setting,omitempty\""];
+  // the recipient address
+  string recipient = 40 [json_name="recipient", (tagger.tags)="json:\"recipient,omitempty\""];
+}
+
+// GetUserDataResponse describes response for getting of user-data
+message GetUserDataResponse {
+  // the indicates if the action was successful
+  bool success = 1 [json_name="success", (tagger.tags)="json:\"success,omitempty\""];
+  // the additional data related to the response
+  Data data = 2 [json_name="data", (tagger.tags)="json:\"data,omitempty\""];
+
+  // Data is the nested message containing detailed response information
+  message Data {
+    // the encrypted user data
+    repeated EncryptedUserData encrypted_user_data = 10 [json_name="encryptedUserData", (tagger.tags)="json:\"encryptedUserData,omitempty\""];
+    // Error is additional the errors message related to the response
+    repeated Error errors = 20 [json_name="errors", (tagger.tags)="json:\"errors,omitempty\""];
+  }
+
+  // EncryptedUserData is the setting with encrypted info
+  message EncryptedUserData {
+    // the setting name
+    string setting = 10 [json_name="setting", (tagger.tags)="json:\"setting,omitempty\""];
+    // the encrypted info
+    string encrypted_info = 30 [json_name="encryptedInfo", (tagger.tags)="json:\"encryptedInfo,omitempty\""];
+    // the recipient address
+    string recipient = 40 [json_name="recipient", (tagger.tags)="json:\"recipient,omitempty\""];
+    // the date of creating
+    google.protobuf.Timestamp created_at = 50 [json_name="createdAt", (tagger.tags)="json:\"createdAt,omitempty\""];
+    // the date of last updating
+    google.protobuf.Timestamp updated_at = 60 [json_name="updatedAt", (tagger.tags)="json:\"updatedAt,omitempty\""];
+  }
+
+  // Error is the nested message containing response information about the error
+  message Error {
+    // the setting name
+    string setting = 10 [json_name="setting", (tagger.tags)="json:\"setting,omitempty\""];
+    // the message about error
+    string message = 20 [json_name="message", (tagger.tags)="json:\"message,omitempty\""];
+  }
+}

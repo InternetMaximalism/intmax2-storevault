@@ -116,6 +116,7 @@ func (s *StoreVaultServer) Init(
 			node.RegisterTransactionsServiceServer(s, srv)
 			node.RegisterDepositsServiceServer(s, srv)
 			node.RegisterBalancesServiceServer(s, srv)
+			node.RegisterUserDataServiceServer(s, srv)
 		},
 	)
 
@@ -142,6 +143,7 @@ func (s *StoreVaultServer) Init(
 				node.RegisterTransactionsServiceHandler,
 				node.RegisterDepositsServiceHandler,
 				node.RegisterBalancesServiceHandler,
+				node.RegisterUserDataServiceHandler,
 			},
 			CorsHandler: c.Handler,
 			Swagger: &gateway.Swagger{

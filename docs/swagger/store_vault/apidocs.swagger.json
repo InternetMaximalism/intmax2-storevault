@@ -20,6 +20,9 @@
     },
     {
       "name": "TransactionsService"
+    },
+    {
+      "name": "UserDataService"
     }
   ],
   "host": "SWAGGER_HOST_URL",
@@ -818,6 +821,84 @@
         ]
       }
     },
+    "/v1/user-data": {
+      "post": {
+        "summary": "GetUserData processes a request for getting of user-data",
+        "description": "## GetUserData processes a request for getting of user-data.",
+        "operationId": "UserDataService_GetUserData",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetUserDataResponse"
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/protobufEmpty"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1GetUserDataRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UserDataService"
+        ]
+      },
+      "put": {
+        "summary": "PutUserData processes a request for updating of user-data",
+        "description": "## PutUserData processes a request for updating of user-data.\n\nIf needs to delete a `setting`, simply provide the `encrypted_info` value equal to `␡` (Unicode DELETE character `\\u2421`).",
+        "operationId": "UserDataService_PutUserData",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1PutUserDataResponse"
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/protobufEmpty"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1PutUserDataRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UserDataService"
+        ]
+      }
+    },
     "/v1/version": {
       "get": {
         "summary": "Version returns the build service info",
@@ -937,6 +1018,34 @@
           "format": "date-time"
         }
       }
+    },
+    "GetUserDataResponseError": {
+      "type": "object",
+      "properties": {
+        "setting": {
+          "type": "string",
+          "title": "the setting name"
+        },
+        "message": {
+          "type": "string",
+          "title": "the message about error"
+        }
+      },
+      "title": "Error is the nested message containing response information about the error"
+    },
+    "PutUserDataResponseMessage": {
+      "type": "object",
+      "properties": {
+        "setting": {
+          "type": "string",
+          "title": "the setting name"
+        },
+        "message": {
+          "type": "string",
+          "title": "the message about error"
+        }
+      },
+      "title": "Message is the nested message containing response information about the updates"
     },
     "protobufAny": {
       "type": "object",
@@ -2322,6 +2431,91 @@
       },
       "description": "GetBalancesByAddressResponse returns the response message containing a list of token balances by address."
     },
+    "v1GetUserDataRequest": {
+      "type": "object",
+      "properties": {
+        "accessToken": {
+          "type": "string",
+          "title": "the access token"
+        },
+        "setting": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "the setting name"
+        },
+        "recipient": {
+          "type": "string",
+          "title": "the recipient address"
+        }
+      },
+      "title": "GetUserDataRequest describes request for getting of user-data"
+    },
+    "v1GetUserDataResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "the indicates if the action was successful"
+        },
+        "data": {
+          "$ref": "#/definitions/v1GetUserDataResponseData",
+          "title": "the additional data related to the response"
+        }
+      },
+      "title": "GetUserDataResponse describes response for getting of user-data"
+    },
+    "v1GetUserDataResponseData": {
+      "type": "object",
+      "properties": {
+        "encryptedUserData": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1GetUserDataResponseEncryptedUserData"
+          },
+          "title": "the encrypted user data"
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/GetUserDataResponseError"
+          },
+          "title": "Error is additional the errors message related to the response"
+        }
+      },
+      "title": "Data is the nested message containing detailed response information"
+    },
+    "v1GetUserDataResponseEncryptedUserData": {
+      "type": "object",
+      "properties": {
+        "setting": {
+          "type": "string",
+          "title": "the setting name"
+        },
+        "encryptedInfo": {
+          "type": "string",
+          "title": "the encrypted info"
+        },
+        "recipient": {
+          "type": "string",
+          "title": "the recipient address"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "title": "the date of creating"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "title": "the date of last updating"
+        }
+      },
+      "title": "EncryptedUserData is the setting with encrypted info"
+    },
     "v1GetVerifyDepositConfirmationResponse": {
       "type": "object",
       "properties": {
@@ -2342,6 +2536,70 @@
         "confirmed": {
           "type": "boolean",
           "title": "Indicates whether the deposit is confirmed"
+        }
+      },
+      "title": "Data is the nested message containing detailed response information"
+    },
+    "v1PutUserDataRequest": {
+      "type": "object",
+      "properties": {
+        "accessToken": {
+          "type": "string",
+          "title": "the access token"
+        },
+        "encryptedUserData": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1PutUserDataRequestEncryptedUserData"
+          },
+          "title": "the encrypted user data"
+        },
+        "recipient": {
+          "type": "string",
+          "title": "The recipient address"
+        }
+      },
+      "title": "PutUserDataRequest describes request for updating of user-data"
+    },
+    "v1PutUserDataRequestEncryptedUserData": {
+      "type": "object",
+      "properties": {
+        "setting": {
+          "type": "string",
+          "title": "the setting name"
+        },
+        "encryptedInfo": {
+          "type": "string",
+          "title": "the encrypted info"
+        }
+      },
+      "title": "EncryptedUserData is the setting with encrypted info"
+    },
+    "v1PutUserDataResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "the indicates if the action was successful"
+        },
+        "data": {
+          "$ref": "#/definitions/v1PutUserDataResponseData",
+          "title": "the additional data related to the response"
+        }
+      },
+      "title": "PutUserDataResponse describes response for updating of user-data"
+    },
+    "v1PutUserDataResponseData": {
+      "type": "object",
+      "properties": {
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/PutUserDataResponseMessage"
+          },
+          "title": "the message is indicating the result of the updates"
         }
       },
       "title": "Data is the nested message containing detailed response information"
