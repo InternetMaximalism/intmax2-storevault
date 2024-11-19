@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package store_vault.v1;
+
+import "tagger/tagger.proto";
+
+// Defines the import path that should be used to import the generated package,
+// and the package name.
+option go_package = ".;store_vault";
+
+message StoreVaultError {
+  string code = 1 [json_name="code", (tagger.tags)="json:\"code,omitempty\""];
+  string message = 2 [json_name="message", (tagger.tags)="json:\"message,omitempty\""];
+}

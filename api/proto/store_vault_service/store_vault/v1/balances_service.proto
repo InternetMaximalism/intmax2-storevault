@@ -1,0 +1,253 @@
+syntax = "proto3";
+
+package store_vault.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "tagger/tagger.proto";
+
+import "store_vault/v1/generic.proto";
+
+// Defines the import path that should be used to import the generated package,
+// and the package name.
+option go_package = ".;store_vault";
+
+// BalancesService definition for Data Store Vault
+service BalancesService {
+  rpc BackupBalance(BackupBalanceRequest) returns (BackupBalanceResponse) {
+    option (google.api.http) = {
+      post: "/v1/backups/balance"
+      body: "*"
+    };
+  }
+
+  rpc GetBackupBalances(GetBackupBalancesRequest) returns (GetBackupBalancesResponse) {
+    option (google.api.http) = {
+      get: "/v1/backups/balance"
+    };
+  }
+
+  // GetBackupBalanceProofs retrieves sender's balance proofs for a given hashes
+  //
+  // ## This method retrieves the sender's balance proofs for the provided hashes.
+  rpc GetBackupBalanceProofs(GetBackupBalanceProofsRequest) returns (GetBackupBalanceProofsResponse) {
+    option (google.api.http) = {
+      get: "/v1/backups/proof"
+    };
+  }
+
+  // GetBalancesByAddress retrieves balances for a given address
+  //
+  // ## GetBalancesByAddress retrieves the balances for the provided address.
+  rpc GetBalancesByAddress(GetBalancesByAddressRequest) returns (GetBalancesByAddressResponse) {
+    option (google.api.http) = {
+      get: "/v1/balances/{address}"
+    };
+  }
+
+  rpc BackupUserState(BackupUserStateRequest) returns (BackupUserStateResponse) {
+    option (google.api.http) = {
+      post: "/v1/backups/user-state"
+      body: "*"
+    };
+  }
+
+  rpc GetBackupUserState(GetBackupUserStateRequest) returns (GetBackupUserStateResponse) {
+    option (google.api.http) = {
+      get: "/v1/backups/user-state/{user_state_id}"
+    };
+  }
+}
+
+message BackupBalanceRequest {
+  string user = 1 [json_name="user", (tagger.tags)="json:\"user,omitempty\""];
+  string encrypted_balance_proof = 2 [json_name="encryptedBalanceProof", (tagger.tags)="json:\"encryptedBalanceProof,omitempty\""];
+  string encrypted_balance_data = 3 [json_name="encryptedBalanceData", (tagger.tags)="json:\"encryptedBalanceData,omitempty\""];
+  repeated string encrypted_txs = 4 [json_name="encryptedTxs", (tagger.tags)="json:\"encryptedTxs,omitempty\""];
+  repeated string encrypted_transfers = 5 [json_name="encryptedTransfers", (tagger.tags)="json:\"encryptedTransfers,omitempty\""];
+  repeated string encrypted_deposits = 6 [json_name="encryptedDeposits", (tagger.tags)="json:\"encryptedDeposits,omitempty\""];
+  string signature = 7 [json_name="signature", (tagger.tags)="json:\"signature,omitempty\""];
+  uint64 block_number = 8 [json_name="blockNumber", (tagger.tags)="json:\"blockNumber,omitempty\""];
+  string prev_id = 9 [json_name="prevId", (tagger.tags)="json:\"prevId,omitempty\""];
+}
+
+message BackupBalanceResponse {
+  // Indicates if the backup transfer was successful
+  bool success = 1 [json_name="success", (tagger.tags)="json:\"success,omitempty\""];
+  // Additional data related to the response
+  Data data = 2 [json_name="data", (tagger.tags)="json:\"data,omitempty\""];
+  // Data is the nested message containing detailed response information
+  message Data {
+    // A message indicating the result of the backup transfer
+    Balance balance = 1 [json_name="balance", (tagger.tags)="json:\"balance,omitempty\""];
+
+    message Balance {
+      string id = 1 [json_name="id", (tagger.tags)="json:\"id,omitempty\""];
+      string user_address = 2 [json_name="userAddress", (tagger.tags)="json:\"userAddress,omitempty\""];
+      string encrypted_balance_proof = 3 [json_name="encryptedBalanceProof", (tagger.tags)="json:\"encryptedBalanceProof,omitempty\""];
+      string encrypted_balance_data = 4 [json_name="encryptedBalanceData", (tagger.tags)="json:\"encryptedBalanceData,omitempty\""];
+      repeated string encrypted_txs = 5 [json_name="encryptedTxs", (tagger.tags)="json:\"encryptedTxs,omitempty\""];
+      repeated string encrypted_transfers = 6 [json_name="encryptedTransfers", (tagger.tags)="json:\"encryptedTransfers,omitempty\""];
+      repeated string encrypted_deposits = 7 [json_name="encryptedDeposits", (tagger.tags)="json:\"encryptedDeposits,omitempty\""];
+      uint64 block_number = 8 [json_name="blockNumber", (tagger.tags)="json:\"blockNumber,omitempty\""];
+      string signature = 9 [json_name="signature", (tagger.tags)="json:\"signature,omitempty\""];
+      google.protobuf.Timestamp created_at = 10 [json_name="createdAt", (tagger.tags)="json:\"createdAt,omitempty\""];
+    }
+  }
+}
+
+message GetBackupBalancesRequest {
+  string sender = 1 [json_name="sender", (tagger.tags)="json:\"sender,omitempty\""];
+  uint64 start_block_number = 2 [json_name="startBlockNumber", (tagger.tags)="json:\"startBlockNumber,omitempty\""];
+  uint64 limit = 3 [json_name="limit", (tagger.tags)="json:\"limit,omitempty\""];
+}
+
+message GetBackupBalancesResponse {
+  bool success = 1 [json_name="success", (tagger.tags)="json:\"success,omitempty\""];
+  Data data = 2 [json_name="data", (tagger.tags)="json:\"data,omitempty\""];
+
+  message Data {
+    repeated Balance balances = 1 [json_name="balances", (tagger.tags)="json:\"balances,omitempty\""];
+    Meta meta = 2 [json_name="meta", (tagger.tags)="json:\"meta,omitempty\""];
+  }
+
+  message Balance {
+    string id = 1 [json_name="id", (tagger.tags)="json:\"id,omitempty\""];
+    string user_address = 2 [json_name="userAddress", (tagger.tags)="json:\"userAddress,omitempty\""];
+    string encrypted_balance_proof = 3 [json_name="encryptedBalanceProof", (tagger.tags)="json:\"encryptedBalanceProof,omitempty\""];
+    string encrypted_balance_data = 4 [json_name="encryptedBalanceData", (tagger.tags)="json:\"encryptedBalanceData,omitempty\""];
+    repeated string encrypted_txs = 5 [json_name="encryptedTxs", (tagger.tags)="json:\"encryptedTxs,omitempty\""];
+    repeated string encrypted_transfers = 6 [json_name="encryptedTransfers", (tagger.tags)="json:\"encryptedTransfers,omitempty\""];
+    repeated string encrypted_deposits = 7 [json_name="encryptedDeposits", (tagger.tags)="json:\"encryptedDeposits,omitempty\""];
+    uint64 block_number = 8 [json_name="blockNumber", (tagger.tags)="json:\"blockNumber,omitempty\""];
+    string signature = 9 [json_name="signature", (tagger.tags)="json:\"signature,omitempty\""];
+    google.protobuf.Timestamp created_at = 10 [json_name="createdAt", (tagger.tags)="json:\"createdAt,omitempty\""];
+  }
+
+  message Meta {
+    uint64 start_block_number = 1 [json_name="startBlockNumber", (tagger.tags)="json:\"startBlockNumber,omitempty\""];
+    uint64 end_block_number = 2 [json_name="endBlockNumber", (tagger.tags)="json:\"endBlockNumber,omitempty\""];
+  }
+
+  StoreVaultError error = 3 [json_name="error", (tagger.tags)="json:\"error,omitempty\""];
+}
+
+message GetBackupBalanceProofsRequest {
+  repeated string hashes = 1 [json_name="hashes", (tagger.tags)="json:\"hashes,omitempty\""];
+}
+
+message GetBackupBalanceProofsResponse {
+  bool success = 1 [json_name="success", (tagger.tags)="json:\"success,omitempty\""];
+  Data data = 2 [json_name="data", (tagger.tags)="json:\"data,omitempty\""];
+  StoreVaultError error = 3 [json_name="error", (tagger.tags)="json:\"error,omitempty\""];
+
+  message Data {
+    repeated Proof proofs = 1 [json_name="proofs", (tagger.tags)="json:\"proofs,omitempty\""];
+  }
+
+  message Proof {
+    string id = 1 [json_name="id", (tagger.tags)="json:\"id,omitempty\""];
+    string enough_balance_proof_body_hash = 2 [json_name="enoughBalanceProofBodyHash", (tagger.tags)="json:\"enoughBalanceProofBodyHash,omitempty\""];
+    string last_balance_proof_body = 3 [json_name="lastBalanceProofBody", (tagger.tags)="json:\"lastBalanceProofBody,omitempty\""];
+    string balance_transition_proof_body = 4 [json_name="balanceTransitionProofBody", (tagger.tags)="json:\"balanceTransitionProofBody,omitempty\""];
+  }
+}
+
+// GetBalanceByAddressRequest is the request message for the balances for the provided address.
+message GetBalancesByAddressRequest {
+  // The address to retrieve the balance for
+  string address = 1 [json_name="address", (tagger.tags)="json:\"address,omitempty\""];
+}
+
+// GetBalancesByAddressResponse returns the response message containing a list of token balances by address.
+message GetBalancesByAddressResponse {
+  bool success = 1 [json_name="success", (tagger.tags)="json:\"success,omitempty\""];
+  // The list of deposits
+  repeated BackupDeposit deposits = 2 [json_name="deposits", (tagger.tags)="json:\"deposits,omitempty\""];
+  // The list of transfers
+  repeated BackupTransfer transfers = 3 [json_name="transfers", (tagger.tags)="json:\"transfers,omitempty\""];
+  // The list of transactions
+  repeated BackupTransaction transactions = 4 [json_name="transactions", (tagger.tags)="json:\"transactions,omitempty\""];
+
+  message BackupDeposit {
+    string recipient = 1 [json_name="recipient", (tagger.tags)="json:\"recipient,omitempty\""];
+    string encrypted_deposit = 2 [json_name="encryptedDeposit", (tagger.tags)="json:\"encryptedDeposit,omitempty\""];
+    uint64 block_number = 3 [json_name="blockNumber", (tagger.tags)="json:\"blockNumber,omitempty\""];
+    google.protobuf.Timestamp created_at = 4 [json_name="createdAt", (tagger.tags)="json:\"createdAt,omitempty\""];
+  }
+
+  message BackupTransfer {
+    string encrypted_transfer = 1 [json_name="encryptedTransfer", (tagger.tags)="json:\"encryptedTransfer,omitempty\""];
+    string recipient = 2 [json_name="recipient", (tagger.tags)="json:\"recipient,omitempty\""];
+    uint64 block_number = 3 [json_name="blockNumber", (tagger.tags)="json:\"blockNumber,omitempty\""];
+    google.protobuf.Timestamp created_at = 4 [json_name="createdAt", (tagger.tags)="json:\"createdAt,omitempty\""];
+  }
+
+  message BackupTransaction {
+    string sender = 1 [json_name="sender", (tagger.tags)="json:\"sender,omitempty\""];
+    string encrypted_tx = 2 [json_name="encryptedTx", (tagger.tags)="json:\"encryptedTx,omitempty\""];
+    string block_number = 3 [json_name="blockNumber", (tagger.tags)="json:\"blockNumber,omitempty\""];
+    uint32 encoding_version = 4 [json_name="encodingVersion", (tagger.tags)="json:\"encodingVersion,omitempty\""];
+    google.protobuf.Timestamp created_at = 5 [json_name="createdAt", (tagger.tags)="json:\"createdAt,omitempty\""];
+  }
+}
+
+message BackupUserStateRequest {
+  string user_address = 1 [json_name="userAddress", (tagger.tags)="json:\"userAddress,omitempty\""];
+  string balance_proof = 2 [json_name="balanceProof", (tagger.tags)="json:\"balanceProof,omitempty\""];
+  string encrypted_user_state = 3 [json_name="encryptedUserState", (tagger.tags)="json:\"encryptedUserState,omitempty\""];
+  string auth_signature = 4 [json_name="authSignature", (tagger.tags)="json:\"authSignature,omitempty\""];
+  uint32 block_number = 5 [json_name="blockNumber", (tagger.tags)="json:\"blockNumber,omitempty\""];
+}
+
+message BackupUserStateResponse {
+  // Indicates if the backup transfer was successful
+  bool success = 1 [json_name="success", (tagger.tags)="json:\"success,omitempty\""];
+  // Additional data related to the response
+  Data data = 2 [json_name="data", (tagger.tags)="json:\"data,omitempty\""];
+  // Data is the nested message containing detailed response information
+  message Data {
+    // A message indicating the result of the backup user state
+    string message = 1 [json_name="message", (tagger.tags)="json:\"message,omitempty\""];
+    // A message indicating the result of the backup user state
+    Balance balance = 2 [json_name="balance", (tagger.tags)="json:\"balance,omitempty\""];
+
+    message Balance {
+      string user_state_id = 1 [json_name="userStateId", (tagger.tags)="json:\"userStateId,omitempty\""];
+      string user_address = 2 [json_name="userAddress", (tagger.tags)="json:\"userAddress,omitempty\""];
+      string balance_proof = 3 [json_name="balanceProof", (tagger.tags)="json:\"balanceProof,omitempty\""];
+      string encrypted_user_state = 4 [json_name="encryptedUserState", (tagger.tags)="json:\"encryptedUserState,omitempty\""];
+      uint32 block_number = 5 [json_name="blockNumber", (tagger.tags)="json:\"blockNumber,omitempty\""];
+      string auth_signature = 6 [json_name="authSignature", (tagger.tags)="json:\"authSignature,omitempty\""];
+      google.protobuf.Timestamp created_at = 7 [json_name="createdAt", (tagger.tags)="json:\"createdAt,omitempty\""];
+    }
+  }
+}
+
+message GetBackupUserStateRequest {
+  string user_state_id = 1 [json_name="userStateId", (tagger.tags)="json:\"userStateId,omitempty\""];
+}
+
+message GetBackupUserStateResponse {
+  // Indicates if the backup transfer was successful
+  bool success = 1 [json_name="success", (tagger.tags)="json:\"success,omitempty\""];
+  // Additional data related to the response
+  Data data = 2 [json_name="data", (tagger.tags)="json:\"data,omitempty\""];
+  // Data is the nested message containing detailed response information
+  message Data {
+    // A message indicating the result of the backup user state
+    string message = 1 [json_name="message", (tagger.tags)="json:\"message,omitempty\""];
+    // A message indicating the result of the backup user state
+    Balance balance = 2 [json_name="balance", (tagger.tags)="json:\"balance,omitempty\""];
+
+    message Balance {
+      string id = 1 [json_name="id", (tagger.tags)="json:\"id,omitempty\""];
+      string user_address = 2 [json_name="userAddress", (tagger.tags)="json:\"userAddress,omitempty\""];
+      string balance_proof = 3 [json_name="balanceProof", (tagger.tags)="json:\"balanceProof,omitempty\""];
+      string encrypted_user_state = 4 [json_name="encryptedUserState", (tagger.tags)="json:\"encryptedUserState,omitempty\""];
+      uint32 block_number = 5 [json_name="blockNumber", (tagger.tags)="json:\"blockNumber,omitempty\""];
+      string auth_signature = 6 [json_name="authSignature", (tagger.tags)="json:\"authSignature,omitempty\""];
+      google.protobuf.Timestamp created_at = 7 [json_name="createdAt", (tagger.tags)="json:\"createdAt,omitempty\""];
+    }
+  }
+}

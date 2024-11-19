@@ -1,0 +1,413 @@
+syntax = "proto3";
+
+package store_vault.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "tagger/tagger.proto";
+
+import "store_vault/v1/generic.proto";
+
+// Defines the import path that should be used to import the generated package,
+// and the package name.
+option go_package = ".;store_vault";
+
+// TransfersService definition for Data Store Vault
+service TransfersService {
+  // BackupTransfer processes a request for data backup transfer
+  //
+  // ## This method handles the transfer of backup data.
+  rpc BackupTransfer(BackupTransferRequest) returns (BackupTransferResponse) {
+    option (google.api.http) = {
+      post: "/v1/backups/transfer"
+      body: "*"
+    };
+  }
+
+  rpc GetBackupTransfers(GetBackupTransfersRequest) returns (GetBackupTransfersResponse) {
+    option (google.api.http) = {
+      get: "/v1/backups/transfer"
+    };
+  }
+
+  // GetBackupTransfersList processes a request for backup transfers list with pagination and filters
+  //
+  // ## This method handles the backup transfers list with pagination and filters.
+  //
+  // Option for `orderBy` (default=`date_create`)
+  //
+  // Option for `sorting`: `asc`, `desc` (default=`desc`)
+  //
+  // ** **
+  //
+  // In body request need pass array of filters.
+  //
+  // <details>
+  //    <summary>
+  //      Filter must be of this struct:
+  //    </summary>
+  //    ```
+  //    {
+  //      "relation":   "string",
+  //      "dataField": "string",
+  //      "condition":  "string",
+  //      "value":      "string"
+  //    }
+  //    ```
+  // </details>
+  //
+  // Option for `relation`: `and`, `or`
+  //
+  // Option for `dataField`:
+  //  * `backup_start_time`
+  //
+  // Option condition by `dataField`:
+  //  * `backup_start_time`: `lessThan`, `lessThanOrEqualTo`, `greaterThanOrEqualTo`, `greaterThan`.
+  //
+  // Filter `backup_start_time`: `lessThan`, `lessThanOrEqualTo`, `greaterThanOrEqualTo`, `greaterThan`:
+  //  * for filtering need set the value `value` with specified the backup start time
+  //  example: `value` = `2024-06-10T22:00:00.123Z` (`lessThanOrEqualTo`).
+  //
+  // ** **
+  //
+  // In body request need pass pagination
+  //
+  // `perPage` number of items to list per page (min = 0, max=100, default = 100 (if equal 0))
+  //
+  // <details>
+  //    <summary>
+  //      Pagination for request must be of this struct:
+  //    </summary>
+  //    ```
+  //    {
+  //      "direction": "string",
+  //      "perPage": "string",
+  //      "cursor": {
+  //        "uuid": "string",
+  //        "sortingValue": "string"
+  //      }
+  //    }
+  //    ```
+  // </details>
+  //
+  // <details>
+  //    <summary>
+  //      Pagination for response must be of this struct:
+  //    </summary>
+  //    ```
+  //    {
+  //      "perPage": "string",
+  //      "cursor": {
+  //        "prev": {
+  //          "uuid": "string",
+  //          "sortingValue": "string"
+  //        },
+  //        "next": {
+  //          "uuid": "string",
+  //          "sortingValue": "string"
+  //        }
+  //      }
+  //    }
+  //    ```
+  // </details>
+  //
+  // First request with empty pagination with request and empty list of items
+  // <details>
+  //    <summary>
+  //      Pagination for response must be of this struct:
+  //    </summary>
+  //    ```
+  //    {
+  //      "perPage": "100",
+  //      "cursor": null
+  //    }
+  //    ```
+  // </details>
+  //
+  // A request with non-empty `pagination` made from a response with a non-empty list of elements and pagination (`sorting` is `asc`)
+  // <details>
+  //    <summary>
+  //      Pagination for response and next request must be of this struct:
+  //    </summary>
+  //    ```
+  //    Pagination from response
+  //    {
+  //      "perPage": "100",
+  //      "cursor": {
+  //        "prev": {
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
+  //          "sortingValue": "1"
+  //        },
+  //        "next": {
+  //          "uuid": "25a5cb38-9374-47bb-8efb-74d7c3202dad",
+  //          "sortingValue": "100"
+  //        }
+  //      }
+  //    }
+  //    Pagination for request from response with next values
+  //    {
+  //      "perPage": "100",
+  //      "direction": "next",
+  //      "cursor": {
+  //        "uuid": "25a5cb38-9374-47bb-8efb-74d7c3202dad",
+  //        "sorting_value": "100"
+  //      }
+  //    }
+  //    ```
+  // </details>
+  //
+  // A request with non-empty `pagination` made from a response with a non-empty list of elements and pagination (`sorting` is `desc`)
+  // <details>
+  //    <summary>
+  //      Pagination for response and next request must be of this struct:
+  //    </summary>
+  //    ```
+  //    Pagination from response
+  //    {
+  //      "perPage": "10",
+  //      "cursor": {
+  //        "prev": {
+  //          "uuid": "5d31d229-3c1a-43d7-a5ae-eeca1c60f5f1",
+  //          "sortingValue": "10"
+  //        },
+  //        "next": {
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
+  //          "sorting_value": "1"
+  //        }
+  //      }
+  //    }
+  //    Pagination for request from response with next values
+  //    {
+  //      "perPage": "10",
+  //      "direction": "next",
+  //      "cursor": {
+  //        "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
+  //        "sortingValue": "1"
+  //      }
+  //    }
+  //    ```
+  // </details>
+  //
+  // A request with non-empty pagination made from a response with a non-empty list of items and pagination for the situation when the end of the items list is reached.
+  // <details>
+  //    <summary>
+  //      Pagination for response and next request must be of this struct:
+  //    </summary>
+  //    ```
+  //    Pagination from response
+  //    {
+  //      "perPage": "10",
+  //      "cursor": {
+  //        "prev": {
+  //          "uuid": "5d31d229-3c1a-43d7-a5ae-eeca1c60f5f1",
+  //          "sortingValue": "10"
+  //        },
+  //        "next": {
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
+  //          "sorting_value": "1"
+  //        }
+  //      }
+  //    }
+  //    Pagination for request from response with next values
+  //    {
+  //      "perPage": "10",
+  //      "direction": "next",
+  //      "cursor": {
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
+  //          "sortingValue": "1"
+  //      }
+  //    }
+  //    Pagination from response
+  //    {
+  //      "perPage": "10",
+  //      "cursor": {
+  //        "prev": {
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
+  //          "sortingValue": "1"
+  //        },
+  //        "next": {
+  //          "uuid": "28b7596f-8966-483b-aa46-6a61aa91cecc",
+  //          "sortingValue": "1"
+  //        }
+  //      }
+  //    }
+  //    ```
+  // </details>
+  rpc GetBackupTransfersList(GetBackupTransfersListRequest) returns (GetBackupTransfersListResponse) {
+    option (google.api.http) = {
+      post: "/v1/backups/transfers/list"
+      body: "*"
+    };
+  }
+
+  // GetBackupTransferByUuid processes a request for backup transfer by uuid
+  //
+  // ## GetBackupTransferByUuid processes a request for backup transfer by uuid.
+  rpc GetBackupTransferByUuid(GetBackupTransferByUuidRequest) returns (GetBackupTransferByUuidResponse) {
+    option (google.api.http) = {
+      get: "/v1/backups/transfer/{uuid}"
+    };
+  }
+}
+
+// BackupTransferRequest is the request message for BackupTransfer method.
+message BackupTransferRequest {
+  // The transfer hash
+  string transfer_hash = 10 [json_name="transferHash", (tagger.tags)="json:\"transferHash,omitempty\""];
+  // The encrypted data for the transfer
+  string encrypted_transfer = 20 [json_name="encryptedTransfer", (tagger.tags)="json:\"encryptedTransfer,omitempty\""];
+  // The recipient address
+  string recipient = 30 [json_name="recipient", (tagger.tags)="json:\"recipient,omitempty\""];
+  // The block number associated with the transfer
+  uint64 block_number = 40 [json_name="blockNumber", (tagger.tags)="json:\"blockNumber,omitempty\""];
+  // The hash of the sender balance proof
+  string sender_enough_balance_proof_body_hash = 50 [json_name="senderEnoughBalanceProofBodyHash", (tagger.tags)="json:\"senderEnoughBalanceProofBodyHash,omitempty\""];
+}
+
+// BackupTransferResponse is the response message for Backup method.
+message BackupTransferResponse {
+  // Indicates if the backup transfer was successful
+  bool success = 1 [json_name="success", (tagger.tags)="json:\"success,omitempty\""];
+  // Additional data related to the response
+  Data data = 2 [json_name="data", (tagger.tags)="json:\"data,omitempty\""];
+  // Data is the nested message containing detailed response information
+  message Data {
+    // A message indicating the result of the backup transfer
+    string message = 1 [json_name="message", (tagger.tags)="json:\"message,omitempty\""];
+  }
+}
+
+message GetBackupTransfersRequest {
+  string sender = 1 [json_name="sender", (tagger.tags)="json:\"sender,omitempty\""];
+  uint64 start_block_number = 2 [json_name="startBlockNumber", (tagger.tags)="json:\"startBlockNumber,omitempty\""];
+  uint64 limit = 3 [json_name="limit", (tagger.tags)="json:\"limit,omitempty\""];
+}
+
+message GetBackupTransfersResponse {
+  bool success = 1 [json_name="success", (tagger.tags)="json:\"success,omitempty\""];
+  Data data = 2 [json_name="data", (tagger.tags)="json:\"data,omitempty\""];
+
+  message Data {
+    repeated Transfer transfers = 1 [json_name="transfers", (tagger.tags)="json:\"transfers,omitempty\""];
+    Meta meta = 2 [json_name="meta", (tagger.tags)="json:\"meta,omitempty\""];
+  }
+
+  message Transfer {
+    string uuid = 1 [json_name="uuid", (tagger.tags)="json:\"uuid,omitempty\""];
+    string recipient = 3 [json_name="recipient", (tagger.tags)="json:\"recipient,omitempty\""];
+    string encrypted_transfer = 4 [json_name="encryptedTransfer", (tagger.tags)="json:\"encryptedTransfer,omitempty\""];
+    google.protobuf.Timestamp created_at = 5 [json_name="createdAt", (tagger.tags)="json:\"createdAt,omitempty\""];
+  }
+
+  message Meta {
+    uint64 start_block_number = 1 [json_name="startBlockNumber", (tagger.tags)="json:\"startBlockNumber,omitempty\""];
+    uint64 end_block_number = 2 [json_name="endBlockNumber", (tagger.tags)="json:\"endBlockNumber,omitempty\""];
+  }
+
+  StoreVaultError error = 3 [json_name="error", (tagger.tags)="json:\"error,omitempty\""];
+}
+
+message GetBackupTransfersListRequest {
+  // the pagination value
+  Pagination pagination = 5 [json_name="pagination", (tagger.tags)="json:\"pagination,omitempty\""];
+  string recipient = 1 [json_name="recipient", (tagger.tags)="json:\"recipient,omitempty\""];
+  // order by sorting (asc or desc)
+  string sorting = 20 [json_name="sorting", (tagger.tags)="json:\"sorting,omitempty\""];
+  // order by (example: date_start)
+  string order_by = 30 [json_name="orderBy", (tagger.tags)="json:\"orderBy,omitempty\""];
+  // filter of body
+  repeated Filter filter = 50 [json_name="filter", (tagger.tags)="json:\"filter,omitempty\""];
+
+  message Pagination {
+    // the direction (prev or next)
+    string direction = 10 [json_name="direction", (tagger.tags)="json:\"direction,omitempty\""];
+    // number of items to list per page
+    // Optional, min = 0, max=100, default = 10 (and if equal 0)
+    string per_page = 30 [json_name="perPage", (tagger.tags)="json:\"perPage,omitempty\""];
+    // cursor by pagination
+    CursorBase cursor = 40 [json_name="cursor", (tagger.tags)="json:\"cursor,omitempty\""];
+  }
+
+  message CursorBase {
+    // the uuid of the backup transfer
+    // example = "1bf0fc62-d119-4059-8c96-499d6c95544e"
+    string uuid = 10 [json_name="uuid", (tagger.tags)="json:\"uuid,omitempty\""];
+    // cursor of next/prev sorting value by pagination
+    // example = "1"
+    string sorting_value = 20 [json_name="sortingValue", (tagger.tags)="json:\"sortingValue,omitempty\""];
+  }
+
+  message Filter {
+    // relation rule between filters (and or)
+    string relation = 1 [json_name="relation", (tagger.tags)="json:\"relation,omitempty\""];
+    // data field to which the filter is applied
+    string data_field = 2 [json_name="dataField", (tagger.tags)="json:\"dataField,omitempty\""];
+    // condition of filter
+    string condition = 3 [json_name="condition", (tagger.tags)="json:\"condition,omitempty\""];
+    // value of filter
+    string value = 4 [json_name="value", (tagger.tags)="json:\"value,omitempty\""];
+  }
+}
+
+message GetBackupTransfersListResponse {
+  bool success = 1 [json_name="success", (tagger.tags)="json:\"success,omitempty\""];
+  Data data = 2 [json_name="data", (tagger.tags)="json:\"data,omitempty\""];
+
+  message Data {
+    // the pagination value
+    Pagination pagination = 10 [json_name="pagination", (tagger.tags)="json:\"pagination,omitempty\""];
+    repeated Transfer transfers = 20 [json_name="transfers", (tagger.tags)="json:\"transfers,omitempty\""];
+  }
+
+  message Pagination {
+    // number of items to list per page
+    // Optional, min = 0, max=100, default = 10 (and if equal 0)
+    string per_page = 30 [json_name="perPage", (tagger.tags)="json:\"perPage,omitempty\""];
+    // cursor by pagination
+    Cursor cursor = 40 [json_name="cursor", (tagger.tags)="json:\"cursor,omitempty\""];
+  }
+
+  message Cursor {
+    // the previous value for paging
+    CursorBase prev = 10 [json_name="prev", (tagger.tags)="json:\"prev,omitempty\""];
+    // the next value for paging
+    CursorBase next = 20 [json_name="next", (tagger.tags)="json:\"next,omitempty\""];
+  }
+
+  message CursorBase {
+    // the uuid of the backup transfer
+    // example = "1bf0fc62-d119-4059-8c96-499d6c95544e"
+    string uuid = 10 [json_name="uuid", (tagger.tags)="json:\"uuid,omitempty\""];
+    // cursor of next/prev sorting value by pagination
+    // example = "1"
+    string sorting_value = 20 [json_name="sortingValue", (tagger.tags)="json:\"sortingValue,omitempty\""];
+  }
+
+  message Transfer {
+    string uuid = 1 [json_name="uuid", (tagger.tags)="json:\"uuid,omitempty\""];
+    string recipient = 3 [json_name="recipient", (tagger.tags)="json:\"recipient,omitempty\""];
+    string encrypted_transfer = 4 [json_name="encryptedTransfer", (tagger.tags)="json:\"encryptedTransfer,omitempty\""];
+    google.protobuf.Timestamp created_at = 5 [json_name="createdAt", (tagger.tags)="json:\"createdAt,omitempty\""];
+    string sorting_value = 20 [json_name="sortingValue", (tagger.tags)="json:\"sortingValue,omitempty\""];
+  }
+}
+
+message GetBackupTransferByUuidRequest {
+  string uuid = 1 [json_name="uuid", (tagger.tags)="json:\"uuid,omitempty\""];
+}
+
+message GetBackupTransferByUuidResponse {
+  bool success = 1 [json_name="success", (tagger.tags)="json:\"success,omitempty\""];
+  Data data = 2 [json_name="data", (tagger.tags)="json:\"data,omitempty\""];
+
+  message Data {
+    Transfer transfer = 1 [json_name="transfer", (tagger.tags)="json:\"transfer,omitempty\""];
+  }
+
+  message Transfer {
+    string uuid = 1 [json_name="uuid", (tagger.tags)="json:\"uuid,omitempty\""];
+    string recipient = 3 [json_name="recipient", (tagger.tags)="json:\"recipient,omitempty\""];
+    string encrypted_transfer = 4 [json_name="encryptedTransfer", (tagger.tags)="json:\"encryptedTransfer,omitempty\""];
+    google.protobuf.Timestamp created_at = 5 [json_name="createdAt", (tagger.tags)="json:\"createdAt,omitempty\""];
+  }
+}

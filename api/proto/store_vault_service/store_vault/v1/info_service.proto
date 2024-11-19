@@ -3,6 +3,7 @@ syntax = "proto3";
 package store_vault.v1;
 
 import "google/api/annotations.proto";
+import "tagger/tagger.proto";
 
 // Defines the import path that should be used to import the generated package,
 // and the package name.
@@ -25,7 +26,7 @@ message VersionRequest {}
 // VersionResponse describes response to get info about the build version info and build time
 message VersionResponse {
   // the service version
-  string version = 1;
+  string version = 1 [json_name="version", (tagger.tags)="json:\"version,omitempty\""];
   // the service build time
-  string buildtime = 2;
+  string buildtime = 2 [json_name="buildtime", (tagger.tags)="json:\"buildtime,omitempty\""];
 }

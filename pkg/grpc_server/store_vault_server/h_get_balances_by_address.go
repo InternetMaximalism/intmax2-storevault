@@ -80,12 +80,12 @@ func (s *StoreVaultServer) GetBalancesByAddress(
 	}
 
 	resp.Success = true
-	resp.Deposits = make([]*node.BackupDeposit, len(list.Deposits))
-	resp.Transfers = make([]*node.BackupTransfer, len(list.Transfers))
-	resp.Transactions = make([]*node.BackupTransaction, len(list.Transactions))
+	resp.Deposits = make([]*node.GetBalancesByAddressResponse_BackupDeposit, len(list.Deposits))
+	resp.Transfers = make([]*node.GetBalancesByAddressResponse_BackupTransfer, len(list.Transfers))
+	resp.Transactions = make([]*node.GetBalancesByAddressResponse_BackupTransaction, len(list.Transactions))
 
 	for key := range list.Deposits {
-		resp.Deposits[key] = &node.BackupDeposit{
+		resp.Deposits[key] = &node.GetBalancesByAddressResponse_BackupDeposit{
 			Recipient:        list.Deposits[key].Recipient,
 			EncryptedDeposit: list.Deposits[key].EncryptedDeposit,
 			BlockNumber:      list.Deposits[key].BlockNumber,
@@ -97,7 +97,7 @@ func (s *StoreVaultServer) GetBalancesByAddress(
 	}
 
 	for key := range list.Transfers {
-		resp.Transfers[key] = &node.BackupTransfer{
+		resp.Transfers[key] = &node.GetBalancesByAddressResponse_BackupTransfer{
 			EncryptedTransfer: list.Transfers[key].EncryptedTransfer,
 			Recipient:         list.Transfers[key].Recipient,
 			BlockNumber:       list.Transfers[key].BlockNumber,
@@ -109,7 +109,7 @@ func (s *StoreVaultServer) GetBalancesByAddress(
 	}
 
 	for key := range list.Transactions {
-		resp.Transactions[key] = &node.BackupTransaction{
+		resp.Transactions[key] = &node.GetBalancesByAddressResponse_BackupTransaction{
 			Sender:      list.Transactions[key].Sender,
 			EncryptedTx: list.Transactions[key].EncryptedTx,
 			BlockNumber: new(big.Int).SetUint64(list.Transactions[key].BlockNumber).String(),

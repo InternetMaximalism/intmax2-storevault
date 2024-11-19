@@ -112,7 +112,10 @@ func (s *StoreVaultServer) Init(
 		s.Config.GRPC.Addr(), // listen incoming host:port for gRPC server
 		func(s grpc.ServiceRegistrar) {
 			node.RegisterInfoServiceServer(s, srv)
-			node.RegisterStoreVaultServiceServer(s, srv)
+			node.RegisterTransfersServiceServer(s, srv)
+			node.RegisterTransactionsServiceServer(s, srv)
+			node.RegisterDepositsServiceServer(s, srv)
+			node.RegisterBalancesServiceServer(s, srv)
 		},
 	)
 
@@ -135,7 +138,10 @@ func (s *StoreVaultServer) Init(
 			HealthCheckHandler: s.HC,
 			Services: []gateway.RegisterServiceHandlerFunc{
 				node.RegisterInfoServiceHandler,
-				node.RegisterStoreVaultServiceHandler,
+				node.RegisterTransfersServiceHandler,
+				node.RegisterTransactionsServiceHandler,
+				node.RegisterDepositsServiceHandler,
+				node.RegisterBalancesServiceHandler,
 			},
 			CorsHandler: c.Handler,
 			Swagger: &gateway.Swagger{

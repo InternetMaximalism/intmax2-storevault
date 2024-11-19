@@ -73,7 +73,10 @@ func Start(
 		addr, // listen incoming host:port for gRPC server
 		func(sr grpc.ServiceRegistrar) {
 			node.RegisterInfoServiceServer(sr, srv)
-			node.RegisterStoreVaultServiceServer(sr, srv)
+			node.RegisterTransfersServiceServer(sr, srv)
+			node.RegisterTransactionsServiceServer(sr, srv)
+			node.RegisterDepositsServiceServer(sr, srv)
+			node.RegisterBalancesServiceServer(sr, srv)
 		},
 	)
 
@@ -95,7 +98,10 @@ func Start(
 			HealthCheckHandler: hc,
 			Services: []gateway.RegisterServiceHandlerFunc{
 				node.RegisterInfoServiceHandler,
-				node.RegisterStoreVaultServiceHandler,
+				node.RegisterTransfersServiceHandler,
+				node.RegisterTransactionsServiceHandler,
+				node.RegisterDepositsServiceHandler,
+				node.RegisterBalancesServiceHandler,
 			},
 			CorsHandler: c.Handler,
 			Swagger: &gateway.Swagger{
